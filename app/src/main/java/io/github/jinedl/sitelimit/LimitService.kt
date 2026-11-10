@@ -36,10 +36,11 @@ class LimitService : AccessibilityService() {
         private const val DIAG_EVERY_MS = 2000L
         private const val TAG = "SiteLimit"
         private const val TICK_MS = 1000L
+        private const val FAST_TICK_MS = 250L
         private const val DUMP_EVERY_MS = 3000L
         private const val MESSAGE_EVERY_MS = 5000L
         /** Сколько даётся на переход с исчерпанного сайта, прежде чем браузер свернётся. */
-        private const val GRACE_MS = 2000L
+        private const val GRACE_MS = 1500L
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -49,7 +50,7 @@ class LimitService : AccessibilityService() {
     private var lastDump = 0L
     private var lastMessage = 0L
     private var lastDiag = 0L
-    /** Исчерпанный сайт на экране и с какого момента он там (для 2 секунд на переход). */
+    /** Исчерпанный сайт на экране и с какого момента он там (для 1,5 секунды на переход). */
     private var overSite: String? = null
     private var overSince = 0L
 
@@ -60,7 +61,8 @@ class LimitService : AccessibilityService() {
             } catch (e: Exception) {
                 Log.w(TAG, "tick failed", e)
             }
-            handler.postDelayed(this, TICK_MS)
+            // Пока идут секунды на переход — проверяем чаще, чтобы свернуть точно через 1,5 с.
+            handler.postDelayed(this, if (overSite != null) FAST_TICK_MS else TICK_MS)
         }
     }
 
@@ -158,7 +160,7 @@ class LimitService : AccessibilityService() {
             overSite = null
             return
         }
-        // Лимит исчерпан: даём 2 секунды, чтобы перейти на другую вкладку.
+        // Лимит исчерпан: даём 1,5 секунды, чтобы перейти на другую вкладку.
         if (overSite != site) {
             overSite = site
             overSince = now

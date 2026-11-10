@@ -20,8 +20,8 @@ android {
         // и простой экран залезал бы под системные панели.
         targetSdk = 34
         // Увеличивать в каждой версии.
-        versionCode = 6
-        versionName = "0.6"
+        versionCode = 7
+        versionName = "0.7"
     }
 
     signingConfigs {

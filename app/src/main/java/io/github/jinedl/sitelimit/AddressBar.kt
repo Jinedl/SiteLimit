@@ -66,10 +66,46 @@ object AddressBar {
     private fun idMatches(id: String, wanted: String): Boolean =
         wanted.isNotEmpty() && (id == wanted || id.endsWith("/$wanted"))
 
+    /** Точные id экранов без сайта (для быстрого поиска): строка поиска, список вкладок, главная. */
+    private val NOT_SITE_IDS = listOf("suggest_view", "tablist_layout", "screen_morda")
+
+    /** Приложения, где проверенный id адресной строки уже находился (за время работы службы). */
+    private val knownIdApps = HashSet<String>()
+
+    /**
+     * Быстрый путь: поиск элементов по id — несколько запросов к системе вместо обхода
+     * сотен элементов. Полный обход — только в приложениях, где известный id не встречался.
+     */
     fun find(root: AccessibilityNodeInfo, screenHeight: Int, customId: String): Result {
+        val pkg = root.packageName?.toString() ?: ""
+        fun byId(id: String): List<AccessibilityNodeInfo> =
+            root.findAccessibilityNodeInfosByViewId(if (id.contains(":id/")) id else "$pkg:id/$id")
+                ?: emptyList()
+
+        if (customId.isNotEmpty()) fastIdResult(byId(customId), "свой id")?.let { return it }
+        for (id in NOT_SITE_IDS) {
+            if (byId(id).isNotEmpty()) return Result.NotDomain("экран без сайта: $id")
+        }
+        fastIdResult(byId(KNOWN_ID), "id адресной строки")?.let {
+            knownIdApps.add(pkg)
+            return it
+        }
+        // Строка в этом приложении находилась раньше, а сейчас её нет — она скрыта при прокрутке.
+        if (pkg in knownIdApps) return Result.None
+
         val nodes = ArrayList<Node>()
         collect(root, nodes)
         return decide(nodes, screenHeight, customId)
+    }
+
+    private fun fastIdResult(found: List<AccessibilityNodeInfo>, name: String): Result? {
+        var hadText = false
+        for (n in found) {
+            val host = Store.normalizeDomain(n.text) ?: Store.normalizeDomain(n.contentDescription)
+            if (host != null) return Result.Domain(host, name)
+            if (!n.text.isNullOrBlank()) hadText = true
+        }
+        return if (hadText) Result.NotDomain("в $name не адрес") else null
     }
 
     /** Домен из элемента с нужным id; NotDomain, если там текст, но не адрес; null, если элемента нет. */
@@ -121,7 +157,7 @@ object AddressBar {
     fun dump(root: AccessibilityNodeInfo, screenHeight: Int, customId: String): String {
         val nodes = ArrayList<Node>()
         collect(root, nodes)
-        val result = decide(nodes, screenHeight, customId)
+        val result = find(root, screenHeight, customId)
         val time = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
         val sb = StringBuilder()
         sb.append("Снимок $time, окно ${root.packageName}, высота экрана $screenHeight\n")
