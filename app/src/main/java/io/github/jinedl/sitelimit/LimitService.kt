@@ -19,12 +19,18 @@ import java.util.Locale
 class LimitService : AccessibilityService() {
 
     companion object {
-        /** Варианты Яндекс Браузера (обычный, Lite, бета, альфа). */
+        /**
+         * Все браузеры Яндекса: Яндекс Браузер (обычный, Lite, бета, альфа)
+         * и приложение «Яндекс — с Алисой» (у него свой встроенный браузер).
+         * Тот же список — в res/xml/accessibility_service_config.xml.
+         */
         val BROWSERS = setOf(
             "com.yandex.browser",
             "com.yandex.browser.lite",
             "com.yandex.browser.beta",
             "com.yandex.browser.alpha",
+            "ru.yandex.searchplugin",
+            "ru.yandex.searchplugin.beta",
         )
         private const val DIAG_EVERY_MS = 2000L
         private const val TAG = "SiteLimit"
