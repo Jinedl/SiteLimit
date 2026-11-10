@@ -105,6 +105,7 @@ class MainActivity : Activity() {
         statusText.text = buildString {
             append(if (on) "Служба: включена ✅" else "Служба: выключена ❌ — включите её в Специальных возможностях")
             append("\nСейчас в браузере: ${current ?: "—"}")
+            append("\nПоследняя проверка: ${Store.diag(this@MainActivity) ?: "служба ещё не запускалась"}")
         }
 
         listContainer.removeAllViews()
@@ -142,7 +143,9 @@ class MainActivity : Activity() {
     private fun showDump() {
         val dump = Store.debugDump(this)
             ?: ("Снимка пока нет.\n\n1. Включите галочку выше.\n2. Откройте Яндекс Браузер на любом сайте.\n" +
-                "3. Подождите 3–5 секунд и вернитесь сюда.")
+                "3. Подождите 3–5 секунд и вернитесь сюда.\n\n" +
+                "Галочка отладки: ${if (Store.isDebug(this)) "включена" else "выключена"}\n" +
+                "Последняя проверка службы: ${Store.diag(this) ?: "служба ещё не запускалась"}")
         val pad = (12 * resources.displayMetrics.density).toInt()
         val tv = TextView(this).apply {
             text = dump

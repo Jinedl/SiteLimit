@@ -78,7 +78,11 @@ object Store {
     fun debugDump(c: Context): String? = settings(c).getString("debug_dump", null)
     fun setDebugDump(c: Context, text: String) = settings(c).edit().putString("debug_dump", text).apply()
 
-    fun currentSite(c: Context): String? = settings(c).getString("current", null)
+    /** Что служба видела при последней проверке (для экрана приложения). */
+    fun diag(c: Context): String? = settings(c).getString("diag", null)
+    fun setDiag(c: Context, text: String) = settings(c).edit().putString("diag", text).apply()
+
+    fun currentSite(c: Context): String?= settings(c).getString("current", null)
     fun setCurrentSite(c: Context, host: String?) = settings(c).edit().putString("current", host).apply()
 
     // ---- домены ----

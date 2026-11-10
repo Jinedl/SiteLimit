@@ -8,6 +8,9 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Раз в секунду смотрит, открыт ли Яндекс Браузер, читает адресную строку
@@ -16,7 +19,14 @@ import android.widget.Toast
 class LimitService : AccessibilityService() {
 
     companion object {
-        const val BROWSER = "com.yandex.browser"
+        /** Варианты Яндекс Браузера (обычный, Lite, бета, альфа). */
+        val BROWSERS = setOf(
+            "com.yandex.browser",
+            "com.yandex.browser.lite",
+            "com.yandex.browser.beta",
+            "com.yandex.browser.alpha",
+        )
+        private const val DIAG_EVERY_MS = 2000L
         private const val TAG = "SiteLimit"
         private const val TICK_MS = 1000L
         private const val DUMP_EVERY_MS = 3000L
@@ -29,6 +39,7 @@ class LimitService : AccessibilityService() {
     private var pendingMs = 0L
     private var lastDump = 0L
     private var lastToast = 0L
+    private var lastDiag = 0L
 
     private val tick = object : Runnable {
         override fun run() {
@@ -73,16 +84,31 @@ class LimitService : AccessibilityService() {
         val elapsed = (now - lastTick).coerceIn(0L, 2 * TICK_MS)
         lastTick = now
 
-        // Экран выключен — время не считается.
         val pm = getSystemService(PowerManager::class.java)
-        if (pm != null && !pm.isInteractive) {
+        val screenOn = pm == null || pm.isInteractive
+        val root = if (screenOn) rootInActiveWindow else null
+        val pkg = root?.packageName?.toString()
+
+        // Диагностика для экрана приложения: служба жива и что она видит.
+        if (now - lastDiag >= DIAG_EVERY_MS) {
+            lastDiag = now
+            val time = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
+            val window = when {
+                !screenOn -> "экран выключен"
+                pkg == null -> "окно недоступно"
+                else -> pkg
+            }
+            Store.setDiag(this, "$time · активное окно: $window")
+        }
+
+        // Экран выключен — время не считается.
+        if (!screenOn) {
             pendingMs = 0
             return
         }
 
         // Считаем только когда на экране сам браузер.
-        val root = rootInActiveWindow ?: return
-        if (root.packageName?.toString() != BROWSER) return
+        if (root == null || pkg !in BROWSERS) return
 
         val screenHeight = resources.displayMetrics.heightPixels
         val customId = Store.customId(this)
