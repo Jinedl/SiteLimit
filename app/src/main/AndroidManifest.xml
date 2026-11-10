@@ -17,6 +17,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Окно «Лимит исчерпан»: отдельная задача, не в списке недавних. -->
+        <activity
+            android:name=".BlockedActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar" />
+
         <service
             android:name=".LimitService"
             android:exported="true"

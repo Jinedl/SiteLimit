@@ -7,7 +7,6 @@ import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -38,9 +37,9 @@ class LimitService : AccessibilityService() {
         private const val TAG = "SiteLimit"
         private const val TICK_MS = 1000L
         private const val DUMP_EVERY_MS = 3000L
-        private const val TOAST_EVERY_MS = 5000L
+        private const val MESSAGE_EVERY_MS = 5000L
         /** Сколько даётся на переход с исчерпанного сайта, прежде чем браузер свернётся. */
-        private const val GRACE_MS = 3000L
+        private const val GRACE_MS = 2000L
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -48,9 +47,9 @@ class LimitService : AccessibilityService() {
     private var lastTick = 0L
     private var pendingMs = 0L
     private var lastDump = 0L
-    private var lastToast = 0L
+    private var lastMessage = 0L
     private var lastDiag = 0L
-    /** Исчерпанный сайт на экране и с какого момента он там (для 3 секунд на переход). */
+    /** Исчерпанный сайт на экране и с какого момента он там (для 2 секунд на переход). */
     private var overSite: String? = null
     private var overSince = 0L
 
@@ -159,7 +158,7 @@ class LimitService : AccessibilityService() {
             overSite = null
             return
         }
-        // Лимит исчерпан: даём 3 секунды, чтобы перейти на другую вкладку.
+        // Лимит исчерпан: даём 2 секунды, чтобы перейти на другую вкладку.
         if (overSite != site) {
             overSite = site
             overSince = now
@@ -172,16 +171,18 @@ class LimitService : AccessibilityService() {
 
     private fun block(site: String, limitMin: Int, now: Long) {
         performGlobalAction(GLOBAL_ACTION_HOME)
-        if (now - lastToast >= TOAST_EVERY_MS) {
-            lastToast = now
-            // Чуть позже, чтобы сообщение не потерялось в анимации выхода на главный экран.
+        if (now - lastMessage >= MESSAGE_EVERY_MS) {
+            lastMessage = now
+            // Всплывающие сообщения (Toast) из фона Android не показывает, если у приложения
+            // выключены уведомления, поэтому — своё окно поверх главного экрана.
+            // Чуть позже, чтобы его не перекрыл запуск главного экрана.
             handler.postDelayed({
-                Toast.makeText(
-                    this,
-                    "SiteLimit: $site — лимит $limitMin мин на сегодня исчерпан",
-                    Toast.LENGTH_LONG
-                ).show()
-            }, 500)
+                try {
+                    startActivity(BlockedActivity.intent(this, site, limitMin))
+                } catch (e: Exception) {
+                    Log.w(TAG, "BlockedActivity failed", e)
+                }
+            }, 400)
         }
     }
 }
