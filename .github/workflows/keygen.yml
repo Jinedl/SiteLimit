@@ -1,0 +1,66 @@
+name: Создать ключ подписи (один раз)
+
+# Запускается вручную: Actions → «Создать ключ подписи (один раз)» → Run workflow.
+# Создаёт постоянный ключ, шифрует его паролем из секрета SIGNING_PASSWORD,
+# кладёт зашифрованный файл в signing/release.p12.enc и запускает сборку.
+
+on: workflow_dispatch
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  keygen:
+    runs-on: ubuntu-latest
+    env:
+      SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Проверки
+        run: |
+          if [ -z "$SIGNING_PASSWORD" ]; then
+            echo "::error title=Нет секрета::Сначала добавьте секрет SIGNING_PASSWORD (README, раздел «Подпись»)."; exit 1
+          fi
+          if [ ${#SIGNING_PASSWORD} -lt 16 ]; then
+            echo "::error title=Короткий пароль::Пароль должен быть не короче 16 символов. Замените секрет SIGNING_PASSWORD."; exit 1
+          fi
+          if [ -f signing/release.p12.enc ]; then
+            echo "::error title=Ключ уже есть::signing/release.p12.enc уже существует. Новый ключ не даст обновлять установленное приложение. Если он точно нужен — сначала удалите этот файл."; exit 1
+          fi
+
+      - name: Создание и шифрование ключа
+        run: |
+          set -e
+          P12="$RUNNER_TEMP/release.p12"
+          keytool -genkeypair -storetype PKCS12 -keystore "$P12" -alias sitelimit \
+            -keyalg RSA -keysize 2048 -validity 36500 -dname "CN=SiteLimit" \
+            -storepass:env SIGNING_PASSWORD -keypass:env SIGNING_PASSWORD
+          mkdir -p signing
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
+            -in "$P12" -out signing/release.p12.enc -pass env:SIGNING_PASSWORD
+          # Проверка: файл расшифровывается обратно в тот же ключ.
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in signing/release.p12.enc -out "$RUNNER_TEMP/check.p12" -pass env:SIGNING_PASSWORD
+          cmp "$P12" "$RUNNER_TEMP/check.p12"
+          keytool -list -v -storetype PKCS12 -keystore "$P12" -storepass:env SIGNING_PASSWORD | grep -E 'SHA256:|Valid'
+          rm -f "$P12" "$RUNNER_TEMP/check.p12"
+
+      - name: Сохранение в репозиторий
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add signing/release.p12.enc
+          git commit -m "Ключ подписи APK (зашифрован)"
+          git push
+
+      - name: Запуск сборки
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build.yml --ref main

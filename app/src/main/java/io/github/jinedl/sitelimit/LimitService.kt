@@ -1,0 +1,124 @@
+package io.github.jinedl.sitelimit
+
+import android.accessibilityservice.AccessibilityService
+import android.os.Handler
+import android.os.Looper
+import android.os.PowerManager
+import android.os.SystemClock
+import android.util.Log
+import android.view.accessibility.AccessibilityEvent
+import android.widget.Toast
+
+/**
+ * Раз в секунду смотрит, открыт ли Яндекс Браузер, читает адресную строку
+ * и добавляет секунду к сайту с лимитом. При превышении — выход на главный экран.
+ */
+class LimitService : AccessibilityService() {
+
+    companion object {
+        const val BROWSER = "com.yandex.browser"
+        private const val TAG = "SiteLimit"
+        private const val TICK_MS = 1000L
+        private const val DUMP_EVERY_MS = 3000L
+        private const val TOAST_EVERY_MS = 5000L
+    }
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var currentHost: String? = null
+    private var lastTick = 0L
+    private var pendingMs = 0L
+    private var lastDump = 0L
+    private var lastToast = 0L
+
+    private val tick = object : Runnable {
+        override fun run() {
+            try {
+                onTick()
+            } catch (e: Exception) {
+                Log.w(TAG, "tick failed", e)
+            }
+            handler.postDelayed(this, TICK_MS)
+        }
+    }
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        Store.cleanupOldUsage(this)
+        lastTick = SystemClock.elapsedRealtime()
+        handler.removeCallbacks(tick)
+        handler.post(tick)
+    }
+
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        // События не нужны: всё делается по таймеру в onTick().
+    }
+
+    override fun onInterrupt() {}
+
+    override fun onDestroy() {
+        handler.removeCallbacks(tick)
+        super.onDestroy()
+    }
+
+    private fun setCurrent(host: String?) {
+        if (host != currentHost) {
+            currentHost = host
+            Store.setCurrentSite(this, host)
+        }
+    }
+
+    private fun onTick() {
+        val now = SystemClock.elapsedRealtime()
+        // Если таймер «проспал» (например, телефон засыпал), не засчитываем больше 2 секунд.
+        val elapsed = (now - lastTick).coerceIn(0L, 2 * TICK_MS)
+        lastTick = now
+
+        // Экран выключен — время не считается.
+        val pm = getSystemService(PowerManager::class.java)
+        if (pm != null && !pm.isInteractive) {
+            pendingMs = 0
+            return
+        }
+
+        // Считаем только когда на экране сам браузер.
+        val root = rootInActiveWindow ?: return
+        if (root.packageName?.toString() != BROWSER) return
+
+        val screenHeight = resources.displayMetrics.heightPixels
+        val customId = Store.customId(this)
+        when (val r = AddressBar.find(root, screenHeight, customId)) {
+            is AddressBar.Result.Domain -> setCurrent(r.host)   // другой домен сбрасывает прежний сайт
+            AddressBar.Result.NotDomain -> setCurrent(null)
+            AddressBar.Result.None -> Unit                      // строка скрыта — сайт прежний
+        }
+
+        if (Store.isDebug(this) && now - lastDump >= DUMP_EVERY_MS) {
+            lastDump = now
+            Store.setDebugDump(this, AddressBar.dump(root, screenHeight, customId))
+        }
+
+        val host = currentHost ?: return
+        val limits = Store.limits(this)
+        val site = Store.matchLimit(host, limits.keys) ?: return
+        val limitMin = limits[site] ?: return
+
+        pendingMs += elapsed
+        val add = (pendingMs / 1000).toInt()
+        pendingMs %= 1000
+        val used = if (add > 0) Store.addSeconds(this, site, add) else Store.usedSeconds(this, site)
+
+        if (used >= limitMin * 60) block(site, limitMin, now)
+    }
+
+    private fun block(site: String, limitMin: Int, now: Long) {
+        performGlobalAction(GLOBAL_ACTION_HOME)
+        if (now - lastToast >= TOAST_EVERY_MS) {
+            lastToast = now
+            Toast.makeText(
+                this,
+                "SiteLimit: $site — лимит $limitMin мин на сегодня исчерпан",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+}
