@@ -27,7 +27,7 @@ object AddressBar {
     private const val KNOWN_ID = "bro_omnibar_address_title_text"
 
     /** Части id экранов, где сайта нет: список вкладок, строка поиска с подсказками, главная. */
-    private val NOT_SITE_HINTS = listOf("tablist_", "suggest_view", "screen_morda")
+    private val NOT_SITE_HINTS = listOf("tablist_", "tab_folder_", "suggest_view", "screen_morda")
 
     private class Node(
         val text: String,
@@ -66,8 +66,20 @@ object AddressBar {
     private fun idMatches(id: String, wanted: String): Boolean =
         wanted.isNotEmpty() && (id == wanted || id.endsWith("/$wanted"))
 
-    /** Точные id экранов без сайта (для быстрого поиска): строка поиска, список вкладок, главная. */
-    private val NOT_SITE_IDS = listOf("suggest_view", "tablist_layout", "screen_morda")
+    /**
+     * Точные id экранов без сайта (для быстрого поиска): строка поиска, список вкладок, главная,
+     * новый список вкладок — шторка снизу (снимок 11.11.2026).
+     */
+    private val NOT_SITE_IDS = listOf(
+        "suggest_view", "tablist_layout", "screen_morda", "tab_folder_container", "tablist_recycler",
+    )
+
+    /**
+     * Нижняя панель «Поиск / Голосовой помощник / Карусель табов» в «Яндекс — с Алисой»:
+     * видна на экранах «Поиск» и «Алиса AI», где адресной строки нет (снимки 11.11.2026).
+     * Проверяется только когда адрес не найден, поэтому на сайтах с видимой строкой не мешает.
+     */
+    private const val APP_NAV_ID = "bottom_navigation_toolbar"
 
     /** Приложения, где проверенный id адресной строки уже находился (за время работы службы). */
     private val knownIdApps = HashSet<String>()
@@ -89,6 +101,10 @@ object AddressBar {
         fastIdResult(byId(KNOWN_ID), "id адресной строки")?.let {
             knownIdApps.add(pkg)
             return it
+        }
+        // Адреса нет, но видна нижняя панель приложения — это «Поиск» или «Алиса AI», не сайт.
+        if (byId(APP_NAV_ID).any { it.isVisibleToUser }) {
+            return Result.NotDomain("экран приложения: $APP_NAV_ID")
         }
         // Строка в этом приложении находилась раньше, а сейчас её нет — она скрыта при прокрутке.
         if (pkg in knownIdApps) return Result.None
