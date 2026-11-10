@@ -74,47 +74,6 @@
             android:textSize="13sp" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Отладка адресной строки"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <CheckBox
-            android:id="@+id/checkDebug"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Сохранять снимок окна браузера (раз в 3 с)" />
-
-        <Button
-            android:id="@+id/btnShowDump"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Показать снимок" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/inputCustomId"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="свой id адресной строки"
-                android:importantForAutofill="no"
-                android:inputType="text" />
-
-            <Button
-                android:id="@+id/btnSaveId"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Сохранить" />
-        </LinearLayout>
-
-        <TextView
             android:id="@+id/versionText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

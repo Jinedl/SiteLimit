@@ -38,7 +38,8 @@ class LimitService : AccessibilityService() {
         private const val TICK_MS = 1000L
         private const val FAST_TICK_MS = 250L
         private const val DUMP_EVERY_MS = 3000L
-        private const val MESSAGE_EVERY_MS = 5000L
+        // Только от двойного запуска окна: повторная блокировка и так не раньше чем через 1,5 с.
+        private const val MESSAGE_EVERY_MS = 1000L
         /** Сколько даётся на переход с исчерпанного сайта, прежде чем браузер свернётся. */
         private const val GRACE_MS = 1500L
     }

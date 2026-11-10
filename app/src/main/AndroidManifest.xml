@@ -25,6 +25,11 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar" />
 
+        <!-- Отладка: вход только долгим нажатием на версию на главном экране. -->
+        <activity
+            android:name=".DebugActivity"
+            android:exported="false" />
+
         <service
             android:name=".LimitService"
             android:exported="true"
