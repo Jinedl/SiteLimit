@@ -39,6 +39,8 @@ class LimitService : AccessibilityService() {
         private const val TICK_MS = 1000L
         private const val DUMP_EVERY_MS = 3000L
         private const val TOAST_EVERY_MS = 5000L
+        /** Сколько даётся на переход с исчерпанного сайта, прежде чем браузер свернётся. */
+        private const val GRACE_MS = 3000L
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -48,6 +50,9 @@ class LimitService : AccessibilityService() {
     private var lastDump = 0L
     private var lastToast = 0L
     private var lastDiag = 0L
+    /** Исчерпанный сайт на экране и с какого момента он там (для 3 секунд на переход). */
+    private var overSite: String? = null
+    private var overSince = 0L
 
     private val tick = object : Runnable {
         override fun run() {
@@ -113,17 +118,21 @@ class LimitService : AccessibilityService() {
         // Экран выключен — время не считается.
         if (!screenOn) {
             pendingMs = 0
+            overSite = null
             return
         }
 
         // Считаем только когда на экране сам браузер.
-        if (root == null || pkg !in BROWSERS) return
+        if (root == null || pkg !in BROWSERS) {
+            overSite = null
+            return
+        }
 
         val screenHeight = resources.displayMetrics.heightPixels
         val customId = Store.customId(this)
         when (val r = AddressBar.find(root, screenHeight, customId)) {
             is AddressBar.Result.Domain -> setCurrent(r.host)   // другой домен сбрасывает прежний сайт
-            AddressBar.Result.NotDomain -> setCurrent(null)
+            is AddressBar.Result.NotDomain -> setCurrent(null)
             AddressBar.Result.None -> Unit                      // строка скрыта — сайт прежний
         }
 
@@ -132,28 +141,47 @@ class LimitService : AccessibilityService() {
             Store.setDebugDump(this, AddressBar.dump(root, screenHeight, customId))
         }
 
-        val host = currentHost ?: return
+        val host = currentHost
         val limits = Store.limits(this)
-        val site = Store.matchLimit(host, limits.keys) ?: return
-        val limitMin = limits[site] ?: return
+        val site = host?.let { Store.matchLimit(it, limits.keys) }
+        val limitMin = site?.let { limits[it] }
+        if (site == null || limitMin == null) {
+            overSite = null
+            return
+        }
 
         pendingMs += elapsed
         val add = (pendingMs / 1000).toInt()
         pendingMs %= 1000
         val used = if (add > 0) Store.addSeconds(this, site, add) else Store.usedSeconds(this, site)
 
-        if (used >= limitMin * 60) block(site, limitMin, now)
+        if (used < limitMin * 60) {
+            overSite = null
+            return
+        }
+        // Лимит исчерпан: даём 3 секунды, чтобы перейти на другую вкладку.
+        if (overSite != site) {
+            overSite = site
+            overSince = now
+        }
+        if (now - overSince >= GRACE_MS) {
+            overSite = null
+            block(site, limitMin, now)
+        }
     }
 
     private fun block(site: String, limitMin: Int, now: Long) {
         performGlobalAction(GLOBAL_ACTION_HOME)
         if (now - lastToast >= TOAST_EVERY_MS) {
             lastToast = now
-            Toast.makeText(
-                this,
-                "SiteLimit: $site — лимит $limitMin мин на сегодня исчерпан",
-                Toast.LENGTH_LONG
-            ).show()
+            // Чуть позже, чтобы сообщение не потерялось в анимации выхода на главный экран.
+            handler.postDelayed({
+                Toast.makeText(
+                    this,
+                    "SiteLimit: $site — лимит $limitMin мин на сегодня исчерпан",
+                    Toast.LENGTH_LONG
+                ).show()
+            }, 500)
         }
     }
 }

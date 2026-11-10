@@ -13,8 +13,8 @@ object AddressBar {
         /** Нашли домен в адресной строке. */
         data class Domain(val host: String, val source: String) : Result()
 
-        /** Свой id найден, но в нём не адрес (например, поисковый запрос) — сайт сбрасывается. */
-        object NotDomain : Result()
+        /** На экране точно не сайт (поиск, список вкладок, главная) — текущий сайт сбрасывается. */
+        data class NotDomain(val reason: String) : Result()
 
         /** Адресная строка не видна (скрыта при прокрутке) — сайт считается прежним. */
         object None : Result()
@@ -22,6 +22,12 @@ object AddressBar {
 
     /** Предполагаемые id адресной строки (только повышают приоритет, не обязательны). */
     private val ID_HINTS = listOf("omnibar", "omnibox", "url", "address")
+
+    /** Проверенный id адресной строки браузеров Яндекса (снимок с телефона, 11.11.2026). */
+    private const val KNOWN_ID = "bro_omnibar_address_title_text"
+
+    /** Части id экранов, где сайта нет: список вкладок, строка поиска с подсказками, главная. */
+    private val NOT_SITE_HINTS = listOf("tablist_", "suggest_view", "screen_morda")
 
     private class Node(
         val text: String,
@@ -66,18 +72,31 @@ object AddressBar {
         return decide(nodes, screenHeight, customId)
     }
 
-    private fun decide(nodes: List<Node>, screenHeight: Int, customId: String): Result {
-        // 1. Свой id из отладки — главный источник.
-        var customHadText = false
+    /** Домен из элемента с нужным id; NotDomain, если там текст, но не адрес; null, если элемента нет. */
+    private fun idResult(nodes: List<Node>, wanted: String, name: String): Result? {
+        var hadText = false
         for (n in nodes) {
-            if (!idMatches(n.id, customId)) continue
+            if (!idMatches(n.id, wanted)) continue
             val host = Store.normalizeDomain(n.text) ?: Store.normalizeDomain(n.desc)
-            if (host != null) return Result.Domain(host, "свой id")
-            if (n.text.isNotBlank()) customHadText = true
+            if (host != null) return Result.Domain(host, name)
+            if (n.text.isNotBlank()) hadText = true
         }
-        if (customHadText) return Result.NotDomain
+        return if (hadText) Result.NotDomain("в $name не адрес") else null
+    }
 
-        // 2. Эвристика: текст, похожий на домен; выше приоритет у id с omnibar/url
+    private fun decide(nodes: List<Node>, screenHeight: Int, customId: String): Result {
+        // 1. Свой id из отладки (если задан) — главнее всего.
+        idResult(nodes, customId, "свой id")?.let { return it }
+
+        // 2. Список вкладок, поиск, главная — сайта на экране нет (даже если строка с прошлым адресом видна).
+        nodes.firstOrNull { n -> NOT_SITE_HINTS.any { n.id.contains(it) } }?.let {
+            return Result.NotDomain("экран без сайта: ${it.id.substringAfter(":id/")}")
+        }
+
+        // 2б. Проверенный id адресной строки.
+        idResult(nodes, KNOWN_ID, "id адресной строки")?.let { return it }
+
+        // 3. Эвристика: текст, похожий на домен; выше приоритет у id с omnibar/url
         //    и у элементов в верхней или нижней четверти экрана.
         var best: Result.Domain? = null
         var bestScore = -1
@@ -109,7 +128,7 @@ object AddressBar {
         sb.append(
             "Определено: " + when (result) {
                 is Result.Domain -> "${result.host} (${result.source})"
-                Result.NotDomain -> "свой id найден, но в нём не адрес"
+                is Result.NotDomain -> "не сайт (${result.reason})"
                 Result.None -> "адрес не найден"
             } + "\n"
         )
