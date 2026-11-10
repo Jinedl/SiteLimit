@@ -82,6 +82,10 @@ object Store {
     fun diag(c: Context): String? = settings(c).getString("diag", null)
     fun setDiag(c: Context, text: String) = settings(c).edit().putString("diag", text).apply()
 
+    /** Последнее окно другого приложения (не SiteLimit), которое видела служба. */
+    fun diagOther(c: Context): String? = settings(c).getString("diag_other", null)
+    fun setDiagOther(c: Context, text: String) = settings(c).edit().putString("diag_other", text).apply()
+
     fun currentSite(c: Context): String?= settings(c).getString("current", null)
     fun setCurrentSite(c: Context, host: String?) = settings(c).edit().putString("current", host).apply()
 

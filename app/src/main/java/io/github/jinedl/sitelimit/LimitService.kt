@@ -31,6 +31,8 @@ class LimitService : AccessibilityService() {
             "com.yandex.browser.alpha",
             "ru.yandex.searchplugin",
             "ru.yandex.searchplugin.beta",
+            "com.yandex.searchapp",
+            "com.yandex.searchapp.beta",
         )
         private const val DIAG_EVERY_MS = 2000L
         private const val TAG = "SiteLimit"
@@ -105,6 +107,7 @@ class LimitService : AccessibilityService() {
                 else -> pkg
             }
             Store.setDiag(this, "$time · активное окно: $window")
+            if (pkg != null && pkg != packageName) Store.setDiagOther(this, "$time · $pkg")
         }
 
         // Экран выключен — время не считается.

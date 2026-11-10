@@ -7,4 +7,4 @@
     android:canRetrieveWindowContent="true"
     android:description="@string/service_description"
     android:notificationTimeout="1000"
-    android:packageNames="com.yandex.browser,com.yandex.browser.lite,com.yandex.browser.beta,com.yandex.browser.alpha,ru.yandex.searchplugin,ru.yandex.searchplugin.beta" />
+    android:packageNames="com.yandex.browser,com.yandex.browser.lite,com.yandex.browser.beta,com.yandex.browser.alpha,ru.yandex.searchplugin,ru.yandex.searchplugin.beta,com.yandex.searchapp,com.yandex.searchapp.beta" />
