@@ -1,0 +1,124 @@
+# SiteLimit снимок · 23:28:15 · com.vkontakte.android · 1080x2107
+# Было в 0.10-beta1: VK — Неизвестно · правило нет
+# Правила: v1 от 2026-11-18 (встроенные)
+# expect: vk service
+# Тексты обрезаны до 40 симв., буквы скрыты (•), кроме слов из правил. ⚑ — слово из правил в обрезанной части.
+pkg=com.vkontakte.android w=1080 h=2107
+y=0..2340 x=0..1080 FrameLayout id=action_bar_root
+y=0..2340 x=0..1080 FrameLayout id=content
+y=0..2340 x=0..1080 FrameLayout id=bottom_nav_content
+y=0..2340 x=0..1080 FrameLayout id=fragment_without_bottom_bar_wrapper
+y=0..2196 x=0..1080 FrameLayout id=fragment_wrapper
+y=89..2052 x=0..1080 ScrollView id=super_app_page
+y=89..257 x=0..1080 LinearLayout id=app_bar_layout
+y=89..257 x=0..1080 ViewGroup id=top_bar
+y=131..215 x=48..132 View desc="••••••• профиль"
+y=131..215 x=804..888 View desc="•••••••••• • ••••••••"
+y=131..215 x=948..1032 View desc="••••••• ••••"
+y=134..213 x=180..365 TextView text="••••"
+y=257..2052 x=0..1080 FrameLayout id=sa_blur_content
+y=257..2052 x=0..1080 FrameLayout id=sa_recycler
+y=257..2052 x=0..1080 ViewGroup id=swipe_refresh_layout
+y=257..2052 x=0..1080 GridView id=recycler
+y=257..1139 x=0..1080 GridView id=expanded_recycler_view_v6
+y=257..543 x=6..273 FrameLayout desc="••••••"
+y=257..473 x=31..247 FrameLayout id=base_container
+y=257..543 x=273..540 FrameLayout desc="••••••••••"
+y=257..473 x=298..514 FrameLayout id=base_container
+y=257..543 x=540..807 FrameLayout desc="••••••"
+y=257..473 x=565..781 FrameLayout id=base_container
+y=257..543 x=807..1074 FrameLayout desc="Видео"
+y=257..473 x=832..1048 FrameLayout id=base_container
+y=281..449 x=55..223 ImageView id=image
+y=281..449 x=322..490 ImageView id=image
+y=281..449 x=589..757 ImageView id=image
+y=281..449 x=856..1024 ImageView id=image
+y=473..519 x=72..206 TextView id=title text="••••••"
+y=473..519 x=290..522 TextView id=title text="••••••••••"
+y=473..519 x=600..747 TextView id=title text="••••••"
+y=473..519 x=882..999 TextView id=title text="Видео"
+y=555..841 x=6..273 FrameLayout desc="••••"
+y=555..771 x=31..247 FrameLayout id=base_container
+y=555..841 x=273..540 FrameLayout desc="•••••••"
+y=555..771 x=298..514 FrameLayout id=base_container
+y=555..841 x=540..807 FrameLayout desc="••••"
+y=555..771 x=565..781 FrameLayout id=base_container
+y=555..841 x=807..1074 FrameLayout desc="••••••••••"
+y=555..771 x=832..1048 FrameLayout id=base_container
+y=579..747 x=55..223 ImageView id=image
+y=579..747 x=322..490 ImageView id=image
+y=579..747 x=589..757 ImageView id=image
+y=579..747 x=856..1024 ImageView id=image
+y=771..817 x=90..188 TextView id=title text="••••"
+y=771..817 x=324..489 TextView id=title text="•••••••"
+y=771..817 x=624..723 TextView id=title text="••••"
+y=771..817 x=828..1053 TextView id=title text="••••••••••"
+y=853..1139 x=6..273 FrameLayout desc="••••••"
+y=853..1069 x=31..247 FrameLayout id=base_container
+y=853..1139 x=273..540 FrameLayout desc="••••••••"
+y=853..1069 x=298..514 FrameLayout id=base_container
+y=853..1139 x=540..807 FrameLayout desc="Настройки"
+y=853..1069 x=565..781 FrameLayout id=base_container
+y=853..1139 x=807..1074 FrameLayout desc="•••"
+y=853..1069 x=832..1048 FrameLayout id=base_container
+y=877..1045 x=55..223 ImageView id=image
+y=877..1045 x=322..490 ImageView id=image
+y=877..1045 x=589..757 ImageView id=image
+y=877..1045 x=856..1024 ImageView id=image
+y=1069..1115 x=69..210 TextView id=title text="••••••"
+y=1069..1115 x=315..497 TextView id=title text="••••••••"
+y=1069..1115 x=571..775 TextView id=title text="Настройки"
+y=1069..1115 x=902..979 TextView id=title text="•••"
+y=1151..1289 x=0..1080 ViewGroup id=ds_internal_group_header_root
+y=1192..1267 x=48..231 TextView id=ds_internal_group_header_title text="•••••"
+y=1301..1602 x=48..1032 FrameLayout desc="•••••••• ••••••••• • •••••••• ••• •••" click
+y=1302..1601 x=49..1031 RecyclerView id=rv_apps
+y=1350..1564 x=91..247 ViewGroup id=grid_item_constraint_container
+y=1350..1494 x=97..241 ImageView id=icon
+y=1350..1564 x=319..475 ViewGroup id=grid_item_constraint_container
+y=1350..1494 x=325..469 ImageView id=icon
+y=1350..1564 x=547..703 ViewGroup id=grid_item_constraint_container
+y=1350..1494 x=553..697 ImageView id=icon
+y=1350..1564 x=775..931 ViewGroup id=grid_item_constraint_container
+y=1350..1494 x=781..925 ImageView id=icon
+y=1350..1564 x=1003..1031 ViewGroup id=grid_item_constraint_container
+y=1350..1494 x=1009..1031 ImageView id=icon
+y=1518..1564 x=91..247 TextView id=app_title text="•••••••• ••••••••••••••"
+y=1518..1564 x=319..475 TextView id=app_title text="••••• [••••••]"
+y=1518..1564 x=547..703 TextView id=app_title text="••••-•••••• - ••••• •••• 0000"
+y=1518..1564 x=775..931 TextView id=app_title text="••••• • •••••••••"
+y=1518..1564 x=1003..1031 TextView id=app_title text="•••••• •• ••••••"
+y=1614..2052 x=36..1044 RecyclerView id=tiles_row_recycler_view
+y=1626..1944 x=48..528 FrameLayout id=content_container
+y=1626..2052 x=552..1032 ViewGroup id=widget_card_containter
+y=1626..2052 x=552..1032 ImageView id=background_image
+y=1662..1908 x=84..492 LinearLayout id=text_block_container
+y=1735..1856 x=84..492 TextView id=title_text_view text="Звонки •••••••••"
+y=1764..2052 x=552..1032 LinearLayout id=card_bottom
+y=1862..1908 x=84..492 TextView id=secondary_subtitle_text_view text="•••••• •••• • видео"
+y=1937..2052 x=588..996 TextView id=title_text_view text="• ••• (+0) •••••••"
+y=1968..2052 x=48..528 FrameLayout id=content_container
+y=2004..2052 x=84..306 ViewGroup id=avatars
+y=2050..2196 x=0..1080 FrameLayout id=bottom_navigation_container
+y=2050..2196 x=0..1080 LinearLayout id=bottom_navigation_sliding_container
+y=2050..2052 x=0..1080 View id=bottom_navigation_shadow
+y=2052..2196 x=0..1080 FrameLayout id=bottom_navigation
+y=2052..2196 x=0..216 FrameLayout id=tab_news desc="Главная" click
+y=2052..2196 x=216..432 FrameLayout id=tab_overview desc="Поиск" click
+y=2052..2196 x=432..648 FrameLayout id=tab_messages desc="Мессенджер 00 ••••••••••••• •••••" click
+y=2052..2196 x=648..864 FrameLayout id=tab_clips desc="Клипы" click
+y=2052..2196 x=864..1080 FrameLayout id=tab_discover desc="Сервисы" click
+y=2077..2131 x=120..174 FrameLayout id=indicator_container
+y=2077..2095 x=138..156 View id=dot
+y=2077..2131 x=551..616 FrameLayout id=indicator_container
+y=2077..2131 x=551..616 TextView id=counter text="00"
+y=2082..2166 x=66..150 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=66..150 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=282..366 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=282..366 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=498..582 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=498..582 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=714..798 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=714..798 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=930..1014 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=930..1014 ImageView id=navigation_bar_item_icon_view

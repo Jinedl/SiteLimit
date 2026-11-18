@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "updated": "2026-11-18",
-  "note": "Признаки экранов для типов контента. status: snap — по снимку с телефона, src — по исходному коду приложения или открытых блокировщиков, guess — догадка. Правила сервиса проверяются сверху вниз, срабатывает первое. Формат — README, раздел «Файл правил».",
+  "note": "Признаки экранов для типов контента. status: snap — по снимку с телефона, src — по исходному коду приложения или открытых блокировщиков, guess — догадка. Правила сервиса проверяются сверху вниз, срабатывает первое. Формат — README, раздел «Файл правил». В числах вроде «34.5K» буква в снимках скрыта (•), поэтому в шаблонах допускается и «•».",
   "keywords": [
     "подписчик", "участник", "коммент", "в сети", "был", "печатает", "бот",
     "сообщение", "telegram", "канал", "избранное", "поиск", "настройки", "истори",
@@ -14,34 +14,34 @@
       "id": "telegram",
       "title": "Telegram",
       "packages": [
-        {"name": "org.telegram.messenger", "status": "guess", "note": "Google Play (по каталогу mixrank, не по странице магазина)"},
-        {"name": "org.telegram.messenger.web", "status": "store", "note": "RuStore: rustore.ru/catalog/app/org.telegram.messenger.web"}
+        {"name": "org.telegram.messenger.web", "status": "snap", "note": "Снимок с телефона владельца 18.11.2026 (версия из RuStore)"},
+        {"name": "org.telegram.messenger", "status": "guess", "note": "Google Play (по каталогу mixrank, не по странице магазина)"}
       ],
       "screens": [
+        {
+          "id": "tg_channel",
+          "type": "channel",
+          "status": "snap",
+          "note": "Шапка канала: название и под ним «34.5K подписчиков» (снимок 18.11.2026). Стоит первым: кнопки «N комментариев» под постами при прокрутке попадают наверх экрана.",
+          "any": [
+            {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|subscriber)", "yMax": 0.12},
+            {"descRe": "\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|subscriber)", "yMax": 0.12},
+            {"textRe": "^(публичный|частный) канал$|^(public|private) channel$", "yMax": 0.12},
+            {"descRe": "(публичный|частный) канал|(public|private) channel", "yMax": 0.12}
+          ],
+          "title": [
+            {"from": {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|subscriber)|^(публичный|частный) канал$|^(public|private) channel$", "yMax": 0.12}, "pick": "above", "field": "text"},
+            {"from": {"descRe": "(подписчик|subscriber|канал|channel)", "clsHas": "frame", "yMax": 0.05}, "field": "desc", "re": "^([^,\\n]+)"}
+          ]
+        },
         {
           "id": "tg_comments",
           "type": "channel",
           "status": "src",
-          "note": "Комментарии под постом — как канал (kb/04). Заголовок «N комментариев» или «Комментарии» (ChatActivity, CommentsTitle).",
+          "note": "Комментарии под постом — как канал (kb/04). Заголовок «N комментариев» или «Комментарии» в шапке (ChatActivity, CommentsTitle). Только TextView: кнопки «N комментариев» под постами — Button.",
           "any": [
-            {"textRe": "^(\\d[\\d\\s.,]*[KКMМ]?\\s+)?(комментари|comment)", "yMax": 0.12},
-            {"descRe": "^(\\d[\\d\\s.,]*[KКMМ]?\\s+)?(комментари|comment)", "yMax": 0.12}
-          ]
-        },
-        {
-          "id": "tg_channel",
-          "type": "channel",
-          "status": "src",
-          "note": "Шапка чата: описание «название\\nподзаголовок», у канала подзаголовок «N подписчиков» или «публичный/частный канал» (ChatAvatarContainer).",
-          "any": [
-            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.12},
-            {"descRe": "\\n\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.12},
-            {"textRe": "^(публичный|частный) канал$|^(public|private) channel$", "yMax": 0.12},
-            {"descRe": "\\n((публичный|частный) канал|(public|private) channel)", "yMax": 0.12}
-          ],
-          "title": [
-            {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)|^(публичный|частный) канал$|^(public|private) channel$", "yMax": 0.12}, "pick": "above", "field": "text"},
-            {"from": {"descRe": "\\n", "yMax": 0.12}, "field": "desc", "re": "^([^\\n]+)"}
+            {"cls": "textview", "textRe": "^(\\d[\\d\\s.,]*[KКMМ•]?\\s+)?(комментари|comment)", "yMax": 0.12},
+            {"descRe": "^(\\d[\\d\\s.,]*[KКMМ•]?\\s+)?(комментари|comment)", "yMax": 0.06}
           ]
         },
         {
@@ -50,37 +50,42 @@
           "status": "src",
           "note": "Группа: подзаголовок «N участников» (иногда «, M в сети»). Большой чат можно перевести в каналы исключением.",
           "any": [
-            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.12},
-            {"descRe": "\\n\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.12}
+            {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?)?\\s*(участник|member)", "yMax": 0.12},
+            {"descRe": "\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?)?\\s*(участник|member)", "yMax": 0.05}
           ],
           "title": [
-            {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.12}, "pick": "above", "field": "text"},
-            {"from": {"descRe": "\\n", "yMax": 0.12}, "field": "desc", "re": "^([^\\n]+)"}
+            {"from": {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?)?\\s*(участник|member)", "yMax": 0.12}, "pick": "above", "field": "text"},
+            {"from": {"descRe": "(участник|member)", "clsHas": "frame", "yMax": 0.05}, "field": "desc", "re": "^([^,\\n]+)"}
           ]
         },
         {
           "id": "tg_search",
           "type": "service",
-          "status": "guess",
-          "note": "Поле поиска вверху экрана.",
+          "status": "snap",
+          "note": "Поле поиска вверху экрана (снимок 18.11.2026).",
           "all": [{"editable": true, "yMax": 0.15}]
         },
         {
           "id": "tg_chat",
           "type": "chat",
           "status": "guess",
-          "note": "Личный чат, «Избранное», бот: поле ввода сообщения внизу.",
-          "all": [{"editable": true, "yMin": 0.6}],
-          "title": {"from": {"descRe": "\\n", "yMax": 0.12}, "field": "desc", "re": "^([^\\n]+)"}
+          "note": "Личный чат, «Избранное», бот: поле ввода сообщения внизу (владелец: личный чат — «Переписка», 18.11.2026).",
+          "all": [{"editable": true, "yMin": 0.4}],
+          "title": [
+            {"from": {"descRe": ", ", "clsHas": "frame", "yMax": 0.05}, "field": "desc", "re": "^([^,\\n]+)"},
+            {"from": {"descRe": "\\n", "yMax": 0.12}, "field": "desc", "re": "^([^\\n]+)"}
+          ]
         },
         {
           "id": "tg_chat_list",
           "type": "chat",
-          "status": "guess",
-          "note": "Список чатов: заголовок «Telegram» или «Соединение…».",
+          "status": "snap",
+          "note": "Список чатов: логотип «Telegram» вверху (описание картинки) или нижние вкладки «Чаты, Контакты, Настройки, Профиль» (снимок 18.11.2026).",
           "any": [
+            {"desc": "Telegram", "yMax": 0.12},
             {"text": "Telegram", "yMax": 0.12},
-            {"textRe": "^(соединение|ожидание сети|обновление|connecting|waiting for network|updating)", "yMax": 0.12}
+            {"textRe": "^(соединение|ожидание сети|обновление|connecting|waiting for network|updating)", "yMax": 0.12},
+            {"text": "Чаты", "yMin": 0.82}
           ]
         }
       ]
@@ -93,31 +98,31 @@
       ],
       "screens": [
         {
-          "id": "max_comments",
-          "type": "channel",
-          "status": "guess",
-          "any": [{"anyRe": "^(\\d[\\d\\s.,]*\\s+)?коммент", "yMax": 0.15}]
-        },
-        {
           "id": "max_channel",
           "type": "channel",
           "status": "guess",
           "note": "Как в Telegram: подзаголовок «N подписчиков» в шапке.",
           "any": [
-            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.15},
-            {"descRe": "\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.15}
+            {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|subscriber)", "yMax": 0.15},
+            {"descRe": "\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|subscriber)", "yMax": 0.06}
           ],
-          "title": {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.15}, "pick": "above", "field": "text"}
+          "title": {"from": {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|subscriber)", "yMax": 0.15}, "pick": "above", "field": "text"}
+        },
+        {
+          "id": "max_comments",
+          "type": "channel",
+          "status": "guess",
+          "any": [{"cls": "textview", "anyRe": "^(\\d[\\d\\s.,]*\\s+)?коммент", "yMax": 0.15}]
         },
         {
           "id": "max_group",
           "type": "chat",
           "status": "guess",
           "any": [
-            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.15},
-            {"descRe": "\\d[\\d\\s.,]*[KКMМ]?\\s*участник", "yMax": 0.15}
+            {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?)?\\s*(участник|member)", "yMax": 0.15},
+            {"descRe": "\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?)?\\s*участник", "yMax": 0.06}
           ],
-          "title": {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.15}, "pick": "above", "field": "text"}
+          "title": {"from": {"textRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?)?\\s*(участник|member)", "yMax": 0.15}, "pick": "above", "field": "text"}
         },
         {
           "id": "max_search",
@@ -129,7 +134,7 @@
           "id": "max_chat",
           "type": "chat",
           "status": "guess",
-          "all": [{"editable": true, "yMin": 0.6}]
+          "all": [{"editable": true, "yMin": 0.4}]
         },
         {
           "id": "max_tabs_chat",
@@ -150,7 +155,7 @@
       "id": "vk",
       "title": "VK",
       "packages": [
-        {"name": "com.vkontakte.android", "status": "store", "note": "RuStore: rustore.ru/catalog/app/com.vkontakte.android"},
+        {"name": "com.vkontakte.android", "status": "snap", "note": "Снимок с телефона владельца 18.11.2026; RuStore: rustore.ru/catalog/app/com.vkontakte.android"},
         {"name": "com.vk.im", "status": "guess", "note": "VK Мессенджер (по каталогу appgoblin)"},
         {"name": "com.vk.vkvideo", "status": "guess", "note": "VK Видео"}
       ],
@@ -176,10 +181,17 @@
           "packages": ["com.vk.vkvideo"]
         },
         {
+          "id": "vk_services",
+          "type": "service",
+          "status": "snap",
+          "note": "Вкладка «Сервисы» (снимок 18.11.2026): плитки сервисов, в т.ч. «Видео» — поэтому раньше правил видео.",
+          "any": [{"id": "super_app_page"}, {"id": "sa_recycler"}]
+        },
+        {
           "id": "vk_clips",
           "type": "shorts",
           "status": "guess",
-          "note": "Клипы: вкладка «Клипы» или элементы с clip в id.",
+          "note": "Клипы: элементы с clip в id (владелец: клипы закрываются, 18.11.2026). Выбранная вкладка внизу у VK не отмечается.",
           "any": [
             {"selected": true, "anyRe": "^(vk )?клипы|^clips", "yMin": 0.82},
             {"idHas": "clips_viewer"},
@@ -190,8 +202,10 @@
         {
           "id": "vk_video",
           "type": "video",
-          "status": "guess",
+          "status": "snap",
+          "note": "Раздел «Видео»: заголовок «Видео» вверху (снимок 18.11.2026) или плеер.",
           "any": [
+            {"id": "title", "textRe": "^(vk )?видео$", "yMax": 0.12},
             {"idHas": "video_player"},
             {"idHas": "videoplayer"},
             {"selected": true, "anyRe": "^(vk )?видео|^video", "yMin": 0.82}
@@ -202,36 +216,42 @@
           "type": "channel",
           "status": "guess",
           "note": "Комментарии — как канал (kb/04).",
-          "any": [{"anyRe": "^(\\d[\\d\\s.,]*\\s+)?коммент", "yMax": 0.15}]
+          "any": [{"cls": "textview", "anyRe": "^(\\d[\\d\\s.,]*\\s+)?коммент", "yMax": 0.15}]
         },
         {
           "id": "vk_chat",
           "type": "chat",
-          "status": "guess",
+          "status": "snap",
+          "note": "Мессенджер: заголовок «Мессенджер», список диалогов (снимок 18.11.2026); открытый диалог — поле ввода внизу.",
           "any": [
-            {"editable": true, "yMin": 0.6},
+            {"id": "dialogs_toolbar"},
+            {"id": "im_item_list"},
+            {"text": "Мессенджер", "yMax": 0.12},
+            {"editable": true, "yMin": 0.4},
             {"selected": true, "anyRe": "^(мессенджер|сообщения|messenger|messages)", "yMin": 0.82}
           ]
+        },
+        {
+          "id": "vk_search",
+          "type": "service",
+          "status": "snap",
+          "note": "Поиск: поле ввода вверху (снимок 18.11.2026). Стоит раньше сообществ: в поиске карточки с «N подписчиков».",
+          "all": [{"editable": true, "yMax": 0.15}]
         },
         {
           "id": "vk_community",
           "type": "channel",
           "status": "guess",
           "note": "Страница сообщества: «N подписчиков» или «N участников» в верхней половине.",
-          "any": [{"anyRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|участник|subscriber|follower|member)", "yMax": 0.5}],
-          "title": {"from": {"anyRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|участник|subscriber|follower|member)", "yMax": 0.5}, "pick": "above", "field": "text"}
-        },
-        {
-          "id": "vk_search",
-          "type": "service",
-          "status": "guess",
-          "all": [{"editable": true, "yMax": 0.15}]
+          "any": [{"anyRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|участник|subscriber|follower|member)", "yMax": 0.5}],
+          "title": {"from": {"anyRe": "^\\d[\\d\\s.,]*([KКMМ•]|тыс\\.?|млн\\.?)?\\s*(подписчик|участник|subscriber|follower|member)", "yMax": 0.5}, "pick": "above", "field": "text"}
         },
         {
           "id": "vk_feed",
           "type": "feed",
           "status": "guess",
           "any": [
+            {"textRe": "^(главная|новости|лента)$", "yMax": 0.12},
             {"selected": true, "anyRe": "^(главная|новости|home|news)", "yMin": 0.82},
             {"selected": true, "anyRe": "^(новости|рекомендации|для вас|news|for you)", "yMax": 0.2}
           ]
@@ -241,6 +261,14 @@
           "type": "service",
           "status": "guess",
           "any": [{"selected": true, "anyRe": "^(сервисы|профиль|services|profile)", "yMin": 0.82}]
+        },
+        {
+          "id": "vk_main_fallback",
+          "type": "feed",
+          "status": "guess",
+          "note": "Главная без снимка: видна нижняя панель VK (выбранная вкладка не отмечается), а ни одно правило выше не сработало. Экран с заголовком-разделом (id title, кроме «Главная») сюда не попадает.",
+          "all": [{"id": "tab_news", "yMin": 0.82}],
+          "none": [{"id": "title", "textRe": "^(?!главная|новости)", "yMax": 0.12}]
         }
       ]
     },
@@ -248,46 +276,48 @@
       "id": "youtube",
       "title": "YouTube",
       "packages": [
-        {"name": "com.google.android.youtube", "status": "guess", "note": "Google Play (по каталогу mixrank и коду блокировщиков)"}
+        {"name": "com.google.android.youtube", "status": "snap", "note": "Снимок с телефона владельца 18.11.2026"}
       ],
       "screens": [
+        {
+          "id": "yt_search",
+          "type": "service",
+          "status": "snap",
+          "note": "Поиск: поле ввода вверху (снимок 18.11.2026). Первым: поиск не закрывается ни в одном пресете.",
+          "all": [{"editable": true, "yMax": 0.15}]
+        },
         {
           "id": "yt_shorts",
           "type": "shorts",
           "status": "src",
-          "note": "id плеера Shorts из открытых блокировщиков (Shorts Blocker: reel_progress_bar; статьи: reel_recycler, shorts_player_container).",
+          "note": "id плеера Shorts из открытых блокировщиков (Shorts Blocker: reel_progress_bar; статьи: reel_recycler, shorts_player_container) и выбранная вкладка Shorts. reel_time_bar есть на всех экранах — не признак.",
           "any": [
             {"id": "reel_progress_bar"},
             {"id": "reel_recycler"},
             {"id": "reel_player_page_container"},
             {"id": "shorts_player_container"},
-            {"id": "reel_watch_player"}
+            {"id": "reel_watch_player"},
+            {"selected": true, "anyRe": "^shorts$", "yMin": 0.82}
           ]
         },
         {
           "id": "yt_video",
           "type": "video",
           "status": "guess",
-          "note": "Страница видео: плеер. Мини-плеер поверх ленты может давать ошибку — нужен снимок.",
+          "note": "Страница видео: плеер в верхней половине экрана (мини-плеер внизу не считается). watch_while_* и next_gen_watch_* есть на всех экранах (снимок 18.11.2026) — не признак.",
           "any": [
-            {"idHas": "watch_player"},
-            {"id": "player_view"},
-            {"idHas": "watch_while"},
-            {"id": "youtube_controls_overlay"},
-            {"idHas": "player_overlay"}
+            {"id": "watch_player", "yMax": 0.5},
+            {"id": "player_view", "yMax": 0.5},
+            {"id": "youtube_controls_overlay", "yMax": 0.5},
+            {"id": "player_control_play_pause_replay_button", "yMax": 0.5},
+            {"id": "watch_list", "yMax": 0.6}
           ]
-        },
-        {
-          "id": "yt_search",
-          "type": "service",
-          "status": "guess",
-          "all": [{"editable": true, "yMax": 0.15}]
         },
         {
           "id": "yt_channel",
           "type": "channel",
-          "status": "guess",
-          "note": "Страница канала: @имя и число подписчиков вверху.",
+          "status": "snap",
+          "note": "Страница канала: @имя и число подписчиков в верхней половине (снимок 18.11.2026). Раньше ленты: внизу выбрана «Главная».",
           "all": [
             {"anyRe": "подписчик|subscriber", "yMax": 0.5},
             {"anyRe": "^@\\S+", "yMax": 0.5}
@@ -296,8 +326,8 @@
         {
           "id": "yt_feed",
           "type": "feed",
-          "status": "guess",
-          "note": "Нижние вкладки «Главная», «Подписки».",
+          "status": "snap",
+          "note": "Нижние вкладки «Главная», «Подписки» (снимок «Подписки» 18.11.2026).",
           "any": [{"selected": true, "anyRe": "^(главная|подписки|home|subscriptions)", "yMin": 0.82}]
         },
         {

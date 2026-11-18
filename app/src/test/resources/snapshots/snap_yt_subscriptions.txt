@@ -1,0 +1,106 @@
+# SiteLimit снимок · 23:30:16 · com.google.android.youtube · 1080x2107
+# Было в 0.10-beta1: YouTube — Длинное видео · правило yt_video
+# Правила: v1 от 2026-11-18 (встроенные)
+# expect: youtube feed
+# Тексты обрезаны до 40 симв., буквы скрыты (•), кроме слов из правил. ⚑ — слово из правил в обрезанной части.
+pkg=com.google.android.youtube w=1080 h=2107
+y=0..2340 x=0..1080 LinearLayout id=action_bar_root
+y=0..2340 x=0..1080 FrameLayout id=content
+y=0..2340 x=0..1080 DrawerLayout id=more_drawer_container
+y=0..2340 x=0..1080 FrameLayout id=slim_status_bar_player_container
+y=0..2196 x=0..1080 ViewGroup id=navigation_bar_divider_frame
+y=0..2196 x=0..1080 FrameLayout id=global_slim_status_bar_container
+y=0..2196 x=0..1080 FrameLayout id=accessibility_layer_container
+y=0..2196 x=0..1080 FrameLayout id=bottom_ui_container
+y=0..2196 x=0..1080 ViewGroup id=next_gen_watch_container_layout
+y=0..2196 x=0..1080 ViewGroup id=watch_while_layout_coordinator_layout
+y=0..2196 x=0..1080 FrameLayout id=fab_container
+y=0..2196 x=0..1080 FrameLayout id=pane_fragment_container
+y=0..2052 x=0..1080 ScrollView id=browse_fragment_layout_coordinator_layout
+y=0..677 x=0..1080 LinearLayout id=appbar_layout
+y=0..233 x=0..1080 FrameLayout id=toolbar_container
+y=0..89 x=0..1080 View id=global_status_bar_view
+y=0..2340 x=0..1080 ViewGroup id=reel_time_bar
+y=89..233 x=0..1080 ViewGroup id=toolbar
+y=89..233 x=0..366 ImageView id=youtube_logo desc="•••••••"
+y=89..233 x=792..936 FrameLayout id=menu_item_0
+y=89..233 x=792..936 ImageView id=menu_item_view desc="•••••••••••" click
+y=89..233 x=936..1080 FrameLayout id=menu_item_1
+y=89..233 x=936..1080 ImageView id=menu_item_view desc="Поиск" click
+y=233..533 x=0..1080 LinearLayout id=parent_view_bar
+y=233..533 x=0..1080 FrameLayout id=parent_container
+y=233..533 x=12..228 RadioButton desc="••••••• •••••• •• •••••••" click
+y=233..533 x=228..444 RadioButton desc="•• канале \"•••••••••••\" •••••••• ••••• •…"(46) click
+y=233..533 x=444..660 RadioButton desc="•• канале \"•••• ••\" •••••••• ••••• •••••…"(42) click
+y=233..533 x=660..876 RadioButton desc="•• канале \"•••••••\" •••••••• ••••• •••••…"(42) click
+y=233..533 x=876..936 RadioButton desc="•• канале \"••••••••\" •••••••• ••••• ••••…"(43) click
+y=263..431 x=36..204 ImageView desc="••••••• •••••• •• •••••••"
+y=263..431 x=252..420 ImageView desc="•••••••••••"
+y=263..431 x=468..636 ImageView desc="•••• ••"
+y=263..431 x=684..852 ImageView desc="•••••••"
+y=263..431 x=900..936 ImageView desc="••••••••"
+y=311..383 x=936..1080 Button desc="•••" click
+y=323..371 x=977..1038 ViewGroup text="•••" desc="•••"
+y=390..423 x=379..412 ViewGroup desc="•••• ••••• •••••••"
+y=390..423 x=595..628 ViewGroup desc="•••• ••••• •••••••"
+y=390..423 x=811..844 ViewGroup desc="•••• ••••• •••••••"
+y=533..677 x=0..1080 LinearLayout id=mysubs_filter_bar
+y=533..677 x=0..1080 LinearLayout id=avatar_row_container
+y=533..677 x=0..1080 LinearLayout id=mysubs_element_container
+y=557..653 x=36..180 ToggleButton desc="••• •••••••" chk click
+y=557..653 x=204..492 ToggleButton desc="•• •••••••" click
+y=557..653 x=516..712 ToggleButton desc="Видео" click
+y=557..653 x=736..933 ToggleButton desc="Shorts" click
+y=557..653 x=957..1080 ToggleButton desc="•••••• • •••••" click
+y=578..632 x=72..144 ViewGroup text="•••" desc="•••"
+y=578..632 x=240..456 ViewGroup text="•• •••••••" desc="•• •••••••"
+y=578..632 x=552..676 ViewGroup text="Видео" desc="Видео"
+y=578..632 x=772..897 ViewGroup text="Shorts" desc="Shorts"
+y=578..632 x=993..1080 ViewGroup text="•••••• • •••••" desc="•••••• • •••••"
+y=677..2052 x=0..1080 FrameLayout id=pane_fragment_contents
+y=677..2052 x=0..1080 FrameLayout id=loading_layout
+y=677..2052 x=0..1080 LinearLayout id=parent_child_layout_container
+y=677..2052 x=0..1080 ViewGroup id=section_list_refresher
+y=677..2052 x=0..1080 RecyclerView id=results
+y=677..833 x=0..1080 Button desc="Shorts" click
+y=722..788 x=192..353 ViewGroup text="Shorts" desc="Shorts"
+y=857..1607 x=48..498 Button desc="••••••••••••• •••••••• видео \"•••••• •• …"(104) click
+y=857..1607 x=534..984 Button desc="••••••••••••• •••••••• видео \"••••• ••••…"(111) click
+y=857..1607 x=1020..1080 Button desc="••••••••••••• •••••••• видео \"••• ••••••…"(70) click
+y=881..935 x=432..486 Button desc="•••" click
+y=881..935 x=918..972 Button desc="•••" click
+y=1416..1522 x=72..474 ViewGroup text="•••••• •• ••• •••••••• ••••••••• ••• •••…"(52) desc="•••••• •• ••• •••••••• ••••••••• ••• •••…"(52)
+y=1416..1522 x=558..960 ViewGroup text="••••• •••••••• ••••••• • •••••••••• • ••…"(58) desc="••••• •••••••• ••••••• • •••••••••• • ••…"(58)
+y=1465..1522 x=1044..1080 ViewGroup text="••• •••••• • •••••" desc="••• •••••• • •••••"
+y=1534..1583 x=72..474 ViewGroup text="00 •••. ••••••••••" desc="00 •••. ••••••••••"
+y=1534..1583 x=558..960 ViewGroup text="00 •••. ••••••••••" desc="00 •••. ••••••••••"
+y=1534..1583 x=1044..1080 ViewGroup text="0 •••. ••••••••••" desc="0 •••. ••••••••••"
+y=1688..1745 x=180..736 ViewGroup text="••••••• •••••• •• •••••••" desc="••••••• •••••• •• •••••••" click
+y=1697..1805 x=36..144 Button desc="••••••• •••••• •• •••••••" click
+y=1715..1787 x=996..1068 Button desc="•••• ••••••••" click
+y=1757..1814 x=180..431 ViewGroup text="0 •••• •••••" desc="0 •••• •••••"
+y=1862..1990 x=36..1032 ViewGroup desc="••••••• • ••••••••. ••• было • •••••••••…"(84) click
+y=1862..1990 x=36..1032 ViewGroup text="••••••• • ••••••••. ••• было • •••••••••…"(84) desc="••••••• • ••••••••. ••• было • •••••••••…"(84)
+y=1931..1990 x=322..673 Button text="•••••://•••.•••" click
+y=2020..2052 x=0..1080 ImageView desc="•••••••••••"
+y=2052..2196 x=0..1080 LinearLayout id=bottom_bar_container
+y=2052..2196 x=0..1080 HorizontalScrollView id=pivot_bar
+y=2052..2196 x=0..216 Button desc="Главная" click
+y=2052..2196 x=216..432 Button desc="Shorts" click
+y=2052..2196 x=432..648 Button desc="•••••••• видео" click
+y=2052..2196 x=648..864 Button desc="Подписки" sel click
+y=2052..2196 x=864..1080 Button desc="••" click
+y=2068..2140 x=72..144 FrameLayout id=thumbnail_layout
+y=2068..2140 x=72..144 ImageView id=image
+y=2068..2140 x=288..360 FrameLayout id=thumbnail_layout
+y=2068..2140 x=288..360 ImageView id=image
+y=2068..2140 x=720..792 FrameLayout id=thumbnail_layout sel
+y=2068..2140 x=720..792 ImageView id=image sel
+y=2068..2140 x=936..1008 FrameLayout id=thumbnail_layout
+y=2068..2140 x=936..1008 ImageView id=pivot_bar_thumbnail
+y=2072..2180 x=486..594 ImageView id=image
+y=2146..2181 x=49..168 TextView id=text text="Главная"
+y=2146..2181 x=277..371 TextView id=text text="Shorts"
+y=2146..2181 x=684..828 TextView id=text text="Подписки" sel
+y=2146..2181 x=948..996 TextView id=text text="••"
+y=2196..2340 x=0..1080 View id=navigationBarBackground

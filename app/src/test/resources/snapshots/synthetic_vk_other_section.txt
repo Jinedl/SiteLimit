@@ -1,0 +1,7 @@
+# expect: vk unknown
+# раздел с заголовком (например «Музыка» из «Сервисов») — не Главная, не закрывается
+pkg=com.vkontakte.android w=1080 h=2107
+y=131..210 x=168..924 TextView id=title text="Музыка"
+y=400..1800 x=0..1080 GridView id=recycler
+y=2052..2196 x=0..216 FrameLayout id=tab_news desc="Главная" click
+y=2052..2196 x=432..648 FrameLayout id=tab_messages desc="Мессенджер" click

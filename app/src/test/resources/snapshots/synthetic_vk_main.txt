@@ -1,0 +1,10 @@
+# expect: vk feed
+# Главная VK без снимка: нижняя панель видна, выбранная вкладка не отмечается (как на снимках 18.11.2026)
+pkg=com.vkontakte.android w=1080 h=2107
+y=89..257 x=0..1080 ViewGroup id=toolbar
+y=300..1200 x=0..1080 ViewGroup desc="Запись сообщества"
+y=2052..2196 x=0..216 FrameLayout id=tab_news desc="Главная" click
+y=2052..2196 x=216..432 FrameLayout id=tab_overview desc="Поиск" click
+y=2052..2196 x=432..648 FrameLayout id=tab_messages desc="Мессенджер" click
+y=2052..2196 x=648..864 FrameLayout id=tab_clips desc="Клипы" click
+y=2052..2196 x=864..1080 FrameLayout id=tab_discover desc="Сервисы" click

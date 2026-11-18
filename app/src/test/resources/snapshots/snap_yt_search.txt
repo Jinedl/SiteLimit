@@ -1,0 +1,64 @@
+# SiteLimit снимок · 23:30:17 · com.google.android.youtube · 1080x2107
+# Было в 0.10-beta1: YouTube — Длинное видео · правило yt_video
+# Правила: v1 от 2026-11-18 (встроенные)
+# expect: youtube service
+# Тексты обрезаны до 40 симв., буквы скрыты (•), кроме слов из правил. ⚑ — слово из правил в обрезанной части.
+pkg=com.google.android.youtube w=1080 h=2107
+y=0..2340 x=0..1080 LinearLayout id=action_bar_root
+y=0..2340 x=0..1080 FrameLayout id=content
+y=0..2340 x=0..1080 DrawerLayout id=more_drawer_container
+y=0..2340 x=0..1080 FrameLayout id=slim_status_bar_player_container
+y=0..1278 x=0..1080 ViewGroup id=navigation_bar_divider_frame
+y=0..1278 x=0..1080 FrameLayout id=global_slim_status_bar_container
+y=0..1278 x=0..1080 FrameLayout id=accessibility_layer_container
+y=0..1278 x=0..1080 ViewGroup id=next_gen_watch_container_layout
+y=0..1278 x=0..1080 ViewGroup id=watch_while_layout_coordinator_layout
+y=0..1278 x=0..1080 FrameLayout id=fab_container
+y=0..1278 x=0..1080 FrameLayout id=pane_fragment_container
+y=0..89 x=0..1080 View id=global_status_bar_view
+y=0..2340 x=0..1080 ViewGroup id=reel_time_bar
+y=89..1134 x=0..1080 ScrollView id=browse_fragment_layout_coordinator_layout
+y=89..233 x=0..1080 LinearLayout id=appbar_layout
+y=89..233 x=0..1080 FrameLayout id=toolbar_container
+y=89..233 x=0..1080 ViewGroup id=toolbar
+y=89..233 x=0..168 ImageButton desc="••••••• •••••" click
+y=89..233 x=168..960 LinearLayout id=search_box
+y=89..233 x=936..1080 ImageView id=voice_search desc="••••••••• поиск" click
+y=113..209 x=168..936 EditText id=search_edit_text text="Поиск" hint="Поиск" click edit
+y=233..1134 x=0..1080 FrameLayout id=pane_fragment_contents
+y=233..1134 x=0..1080 FrameLayout id=search_layout
+y=233..1134 x=0..1080 RecyclerView id=results_recycler_view
+y=233..377 x=0..1080 ViewGroup id=linearLayout click
+y=233..377 x=936..1080 ImageView id=edit_suggestion desc="•••••••• ••••••••• \"••••••••\"" click
+y=251..359 x=744..936 ImageView id=rounded_thumbnail
+y=269..341 x=12..156 ImageView id=search_type_icon
+y=273..338 x=156..744 TextView id=text text="••••••••"
+y=377..521 x=0..1080 ViewGroup id=linearLayout click
+y=377..521 x=936..1080 ImageView id=edit_suggestion desc="•••••••• ••••••••• \"•••••\"" click
+y=381..446 x=156..744 TextView id=text text="•••••"
+y=395..503 x=744..936 ImageView id=rounded_thumbnail
+y=413..485 x=12..156 ImageView id=search_type_icon
+y=449..506 x=156..487 TextView id=byline text="••••• видео" desc="••••• видео"
+y=521..665 x=0..1080 ViewGroup id=linearLayout click
+y=521..665 x=936..1080 ImageView id=edit_suggestion desc="•••••••• ••••••••• \"••• •••••• ••••\"" click
+y=525..590 x=156..744 TextView id=text text="••• •••••• ••••"
+y=539..647 x=744..936 ImageView id=rounded_thumbnail
+y=557..629 x=12..156 ImageView id=search_type_icon
+y=593..650 x=156..487 TextView id=byline text="••••• видео" desc="••••• видео"
+y=665..859 x=0..1080 ViewGroup id=linearLayout click
+y=665..787 x=156..744 TextView id=text text="••••••• •••••• •• •••••••"
+y=665..859 x=936..1080 ImageView id=edit_suggestion desc="•••••••• ••••••••• \"••••••• •••••• •• ••…"(46) click
+y=708..816 x=744..936 ImageView id=rounded_thumbnail
+y=726..798 x=12..156 ImageView id=search_type_icon
+y=787..844 x=156..487 TextView id=byline text="••••• видео" desc="••••• видео"
+y=859..1003 x=0..1080 ViewGroup id=linearLayout click
+y=859..1003 x=936..1080 ImageView id=edit_suggestion desc="•••••••• ••••••••• \"••••\"" click
+y=877..985 x=744..936 ImageView id=rounded_thumbnail
+y=895..967 x=12..156 ImageView id=search_type_icon
+y=899..964 x=156..744 TextView id=text text="••••"
+y=1003..1134 x=0..1080 ViewGroup id=linearLayout click
+y=1003..1134 x=12..156 ImageView id=search_type_icon
+y=1003..1134 x=936..1080 ImageView id=edit_suggestion desc="•••••••• ••••••••• \"••••••••\"" click
+y=1021..1129 x=744..936 ImageView id=rounded_thumbnail
+y=1043..1108 x=156..744 TextView id=text text="••••••••"
+y=2196..2340 x=0..1080 View id=navigationBarBackground

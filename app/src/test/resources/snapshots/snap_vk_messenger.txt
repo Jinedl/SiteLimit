@@ -1,0 +1,89 @@
+# SiteLimit снимок · 23:28:20 · com.vkontakte.android · 1080x2107
+# Было в 0.10-beta1: VK — Неизвестно · правило нет
+# Правила: v1 от 2026-11-18 (встроенные)
+# expect: vk chat
+# Тексты обрезаны до 40 симв., буквы скрыты (•), кроме слов из правил. ⚑ — слово из правил в обрезанной части.
+pkg=com.vkontakte.android w=1080 h=2107
+y=0..2340 x=0..1080 FrameLayout id=action_bar_root
+y=0..2340 x=0..1080 FrameLayout id=content
+y=0..2340 x=0..1080 FrameLayout id=bottom_nav_content
+y=0..2340 x=0..1080 FrameLayout id=fragment_without_bottom_bar_wrapper
+y=0..2196 x=0..1080 FrameLayout id=fragment_wrapper
+y=89..2052 x=0..1080 ViewGroup id=coordinator
+y=89..257 x=0..1080 LinearLayout id=dialogs_toolbar_container
+y=89..257 x=0..1080 ViewGroup id=dialogs_toolbar
+y=134..213 x=192..605 TextView text="Мессенджер"
+y=257..2052 x=0..1080 ViewGroup id=nested_coordinator
+y=257..2052 x=0..1080 LinearLayout id=folders_pager_container
+y=257..401 x=0..1080 LinearLayout id=folders_carousel_vk_tabs
+y=281..377 x=24..168 ViewGroup sel
+y=302..356 x=393..447 View id=counter desc="0"
+y=302..356 x=880..934 View id=counter desc="0"
+y=303..356 x=59..134 TextView id=title text="•••" sel
+y=303..356 x=210..375 TextView id=title text="Каналы"
+y=303..356 x=513..639 TextView id=title text="••••"
+y=303..356 x=705..862 TextView id=title text="••••••"
+y=303..356 x=1000..1080 TextView id=title text="•••••••••"
+y=425..2052 x=0..1080 ViewPager id=folders_pager
+y=425..2052 x=0..1080 FrameLayout id=im_item_list_container
+y=425..2052 x=0..1080 RecyclerView id=im_item_list
+y=485..542 x=264..789 TextView text="•••••••••• контакты"
+y=491..563 x=918..990 View desc="••••••"
+y=548..725 x=264..882 TextView text="•• •••••••• •••••• ••••••• •••••• — ••• …"(55)
+y=781..830 x=300..556 TextView text="••••••••••"
+y=913..1129 x=0..1080 ViewGroup id=dialog click
+y=937..1105 x=48..216 ImageView desc="•••••••••• •••• Избранное" click
+y=955..1020 x=252..502 TextView id=dialog_item_title text="Избранное"
+y=985..1057 x=960..1032 View id=dialog_item_extra_icon desc="0"
+y=1020..1081 x=252..838 TextView id=dialog_item_message_preview text="••••••• •••••• •••• ••• ••••••: ••••• ••…"(183)
+y=1026..1079 x=838..915 TextView text=" · 0•" desc="0 ••••••"
+y=1180..1396 x=0..1080 ViewGroup id=dialog click
+y=1204..1372 x=48..216 ImageView desc="•••••••••• •••• •••••••••• •• ••• 0000/0…"(43) click
+y=1222..1287 x=252..828 TextView id=dialog_item_title text="•••••••••• •• ••• 0000/0000"
+y=1252..1324 x=876..948 View id=dialog_item_extra_icon desc="0"
+y=1252..1324 x=960..1032 View id=dialog_item_unread_messages_count desc="0"
+y=1287..1348 x=252..755 TextView id=dialog_item_message_preview text="•••••• ••••••: ••••••• ••••••. •••• ••••…"(52)
+y=1293..1346 x=755..831 TextView text=" · 0•" desc="0 •••"
+y=1396..1612 x=0..1080 ViewGroup id=dialog click
+y=1420..1588 x=48..216 ImageView desc="•••••••••• •••• •••••••• ••••••••••••••" click
+y=1436..1501 x=252..858 TextView id=dialog_item_title text="•••••••• ••••••••••••••"
+y=1447..1495 x=870..918 ImageView id=dialog_item_verified_icon
+y=1468..1540 x=960..1032 View id=dialog_item_unread_messages_count desc="0"
+y=1501..1565 x=252..839 TextView id=dialog_item_message_preview text="🎉 •• ••••••••• •••••••• •••••••• ••••• …"(472) ⚑участник,канал,бот
+y=1507..1560 x=839..915 TextView text=" · 0•" desc="0 ••••"
+y=1612..1828 x=0..1080 ViewGroup id=dialog click
+y=1654..1719 x=252..377 TextView id=dialog_item_title text="••••"
+y=1684..1756 x=942..1032 View id=dialog_item_unread_messages_count desc="00"
+y=1719..1780 x=252..821 TextView id=dialog_item_message_preview text="••••••, ••• •••••• ••• ••••••••• ••••• •…"(49)
+y=1725..1778 x=821..897 TextView text=" · 0•" desc="0 •••••"
+y=1828..2044 x=0..1080 ViewGroup id=dialog click
+y=1836..2004 x=864..1032 ImageButton id=vkim_fab desc="•••••••• сообщение" click
+y=1852..2020 x=48..216 ImageView desc="•••••••••• •••• ••••••••• •••" click
+y=1870..1935 x=252..621 TextView id=dialog_item_title text="••••••••• •••"
+y=1881..1929 x=633..681 ImageView id=dialog_item_muted_icon
+y=1935..1996 x=252..923 TextView id=dialog_item_message_preview text="••••• ••••••: • •• •••••••• ••••• • ••••…"(231)
+y=1941..1994 x=923..999 TextView text=" · 0•" desc="0 •••••"
+y=2044..2052 x=0..1080 ViewGroup id=dialog click
+y=2050..2196 x=0..1080 FrameLayout id=bottom_navigation_container
+y=2050..2196 x=0..1080 LinearLayout id=bottom_navigation_sliding_container
+y=2050..2052 x=0..1080 View id=bottom_navigation_shadow
+y=2052..2196 x=0..1080 FrameLayout id=bottom_navigation
+y=2052..2196 x=0..216 FrameLayout id=tab_news desc="Главная" click
+y=2052..2196 x=216..432 FrameLayout id=tab_overview desc="Поиск" click
+y=2052..2196 x=432..648 FrameLayout id=tab_messages desc="Мессенджер 00 ••••••••••••• •••••" click
+y=2052..2196 x=648..864 FrameLayout id=tab_clips desc="Клипы" click
+y=2052..2196 x=864..1080 FrameLayout id=tab_discover desc="Сервисы" click
+y=2077..2131 x=120..174 FrameLayout id=indicator_container
+y=2077..2095 x=138..156 View id=dot
+y=2077..2131 x=551..616 FrameLayout id=indicator_container
+y=2077..2131 x=551..616 TextView id=counter text="00"
+y=2082..2166 x=66..150 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=66..150 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=282..366 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=282..366 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=498..582 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=498..582 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=714..798 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=714..798 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=930..1014 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=930..1014 ImageView id=navigation_bar_item_icon_view

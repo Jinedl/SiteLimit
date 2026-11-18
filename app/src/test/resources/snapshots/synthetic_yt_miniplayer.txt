@@ -1,0 +1,7 @@
+# expect: youtube feed
+# мини-плеер внизу поверх «Подписок» — это не страница видео
+pkg=com.google.android.youtube w=1080 h=2107
+y=0..2196 x=0..1080 ViewGroup id=watch_while_layout_coordinator_layout
+y=0..2196 x=0..1080 ViewGroup id=next_gen_watch_container_layout
+y=1850..2040 x=0..1080 FrameLayout id=watch_player
+y=2052..2196 x=648..864 Button desc="Подписки" sel click

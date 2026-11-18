@@ -23,12 +23,14 @@ object Classifier {
     fun title(rule: ScreenRule, screen: Screen): String? {
         for (t in rule.titles) {
             val anchor = screen.nodes.firstOrNull { t.from.test(it, screen.height) } ?: continue
+            // Выше / ниже — только элементы в той же колонке (пересекаются по горизонтали):
+            // иначе в Telegram название канала путается с аватаром («Посмотреть историю») слева.
             val node = when (t.pick) {
                 "above" -> screen.nodes
-                    .filter { it !== anchor && it.text.isNotBlank() && it.top < anchor.top && it.bottom <= anchor.bottom }
+                    .filter { it !== anchor && it.text.isNotBlank() && it.top < anchor.top && it.bottom <= anchor.bottom && sameColumn(it, anchor) }
                     .maxByOrNull { it.top }
                 "below" -> screen.nodes
-                    .filter { it !== anchor && it.text.isNotBlank() && it.top > anchor.top }
+                    .filter { it !== anchor && it.text.isNotBlank() && it.top > anchor.top && sameColumn(it, anchor) }
                     .minByOrNull { it.top }
                 else -> anchor
             } ?: continue
@@ -45,5 +47,11 @@ object Classifier {
             if (clean.isNotEmpty()) return clean
         }
         return null
+    }
+
+    /** Пересекаются по горизонтали. Элементы без координат (в тестах) считаются в одной колонке. */
+    private fun sameColumn(a: UiNode, b: UiNode): Boolean {
+        if (a.right <= a.left || b.right <= b.left) return true
+        return a.left < b.right && b.left < a.right
     }
 }
