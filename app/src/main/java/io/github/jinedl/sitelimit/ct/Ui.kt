@@ -19,6 +19,19 @@ import java.time.ZonedDateTime
 object Ui {
     fun dp(c: Context, v: Int): Int = (v * c.resources.displayMetrics.density).toInt()
 
+    private var lastClickAt = 0L
+
+    /**
+     * Повторное нажатие быстрее 0,6 с не считается: если телефон подтормаживает, второе нажатие
+     * открывало второй такой же диалог, и его приходилось закрывать дважды.
+     */
+    fun once(): Boolean {
+        val now = android.os.SystemClock.uptimeMillis()
+        if (now - lastClickAt < 600) return false
+        lastClickAt = now
+        return true
+    }
+
     /** Страница с прокруткой; возвращает вертикальный контейнер. */
     fun page(a: Activity, title: String): LinearLayout {
         a.title = title
@@ -50,16 +63,16 @@ object Ui {
     fun button(c: Context, s: String, onClick: () -> Unit): Button = Button(c).apply {
         text = s
         isAllCaps = false
-        setOnClickListener { onClick() }
+        setOnClickListener { if (once()) onClick() }
     }
 
     /** Строка списка: нажатие и долгое нажатие. */
     fun row(c: Context, s: CharSequence, onClick: (() -> Unit)? = null, onLong: (() -> Unit)? = null): TextView =
         text(c, s, 16f).apply {
             setPadding(0, dp(c, 10), 0, dp(c, 10))
-            if (onClick != null) setOnClickListener { onClick() }
+            if (onClick != null) setOnClickListener { if (once()) onClick() }
             if (onLong != null) setOnLongClickListener {
-                onLong()
+                if (once()) onLong()
                 true
             }
         }

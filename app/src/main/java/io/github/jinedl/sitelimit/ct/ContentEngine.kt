@@ -31,10 +31,14 @@ class ContentEngine(private val svc: AccessibilityService) {
 
     companion object {
         private const val TAG = "SiteLimit"
-        /** Не чаще: распознавание по событию окна. */
-        private const val CLASSIFY_MIN_MS = 400L
-        /** Без событий — переспросить экран раз в 2 с (на случай пропущенного события). */
-        private const val CLASSIFY_IDLE_MS = 2000L
+        /**
+         * Разбор окна — это запросы в главный поток Telegram, VK, YouTube. Поэтому (0.10-beta2):
+         * при изменении содержимого (прокрутка) — не чаще раза в 1 с; при смене экрана и во время
+         * 1,5 с на переход — не чаще раза в 0,3 с; без событий — раз в 4 с (на случай пропущенного события).
+         */
+        private const val CLASSIFY_MIN_MS = 1000L
+        private const val URGENT_MIN_MS = 300L
+        private const val CLASSIFY_IDLE_MS = 4000L
         /** Через сколько после «Назад» проверить, помогло ли. */
         private const val BACK_CHECK_MS = 700L
         private const val FLUSH_MS = 15_000L
@@ -61,6 +65,8 @@ class ContentEngine(private val svc: AccessibilityService) {
     private var cfg: Cfg? = null
     private var usageLoaded = false
     private var dirty = true
+    /** Сменилось окно (не просто прокрутка) — разобрать быстрее. */
+    private var urgent = true
     private var lastClassifyAt = 0L
     private var lastPkg: String? = null
     private var lastDet: Detection? = null
@@ -70,6 +76,7 @@ class ContentEngine(private val svc: AccessibilityService) {
     private var lastUi = 0L
     private var lastSnapAt = 0L
     private var lastSnapSig: String? = null
+    private var lastSnapScreen: Screen? = null
     private var lastMessage = 0L
     private var lastDate: String? = null
     private var lastTitleKey: String? = null
@@ -83,10 +90,12 @@ class ContentEngine(private val svc: AccessibilityService) {
 
     fun configVersion(): Int = CtStore.configVersion(svc)
 
-    /** Событие окна: только отметка «экран мог измениться», разбор — в tick не чаще CLASSIFY_MIN_MS. */
+    /** Событие окна: только отметка «экран мог измениться», разбор — в tick (см. CLASSIFY_MIN_MS). */
     fun onEvent(e: AccessibilityEvent) {
         val p = e.packageName?.toString() ?: return
-        if (p in config().pkgToSvc) dirty = true
+        if (p !in config().pkgToSvc) return
+        dirty = true
+        if (e.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) urgent = true
     }
 
     fun siteException(host: String): ExRule? = Exceptions.forSite(config().exceptions, host)
@@ -131,15 +140,17 @@ class ContentEngine(private val svc: AccessibilityService) {
         }
 
         val sd = if (screenOn && root != null && pkg != null) c.pkgToSvc[pkg] else null
-        val det = if (sd != null && root != null && pkg != null) classify(root, pkg, sd, now) else null
-        if (det == null) {
+        val raw = if (sd != null && root != null && pkg != null) classify(root, pkg, sd, now) else null
+        if (raw == null) {
             lastPkg = pkg
             lastScreen = null
         }
 
         val active = Scheduler.resolve(ZonedDateTime.now(), c.schedule, c.manual)
         val rules = c.modes[active.mode] ?: ModeRules()
-        val verdict = core.tick(date, det, now, elapsedMs, CtCore.Config(rules, Modes.title(active.mode), c.exceptions))
+        val verdict = core.tick(date, raw, now, elapsedMs, CtCore.Config(rules, Modes.title(active.mode), c.exceptions))
+        // С учётом удержанного названия канала (шапка в анимации).
+        val det = core.lastDetection
         CtLive.last = core.last
         CtLive.lastDetection = det ?: CtLive.lastDetection
 
@@ -153,11 +164,13 @@ class ContentEngine(private val svc: AccessibilityService) {
             lastFlush = now
             CtStore.saveUsage(svc, core.book)
         }
+        CtStore.flushSnapshots(svc, force = det == null, now = now)
         return core.inGrace || pendingBack != null
     }
 
     fun flush() {
         CtStore.saveUsage(svc, core.book)
+        CtStore.flushSnapshots(svc, force = true, now = 0L)
     }
 
     fun destroy() {
@@ -168,13 +181,19 @@ class ContentEngine(private val svc: AccessibilityService) {
 
     private fun classify(root: AccessibilityNodeInfo, pkg: String, sd: ServiceDef, now: Long): Detection {
         val prev = lastDet
-        val need = dirty || pkg != lastPkg || prev == null || prev.service != sd.id || now - lastClassifyAt >= CLASSIFY_IDLE_MS
-        if (!need || (now - lastClassifyAt < CLASSIFY_MIN_MS && prev != null && prev.service == sd.id)) {
+        // Во время 1,5 с на переход и после «Назад» нужен свежий экран: иначе можно закрыть то,
+        // откуда человек уже ушёл (события приходят не чаще раза в секунду).
+        val hurry = core.inGrace || pendingBack != null
+        val fresh = prev == null || prev.service != sd.id || pkg != lastPkg
+        val need = dirty || hurry || fresh || now - lastClassifyAt >= CLASSIFY_IDLE_MS
+        val minGap = if (urgent || hurry) URGENT_MIN_MS else CLASSIFY_MIN_MS
+        if (!need || (!fresh && now - lastClassifyAt < minGap)) {
             return prev ?: Detection(sd.id, ContentType.UNKNOWN)
         }
         lastClassifyAt = now
         lastPkg = pkg
         dirty = false
+        urgent = false
         return try {
             val dm = svc.resources.displayMetrics
             val screen = Screen(pkg, dm.widthPixels, dm.heightPixels, NodeReader.read(root))
@@ -233,7 +252,8 @@ class ContentEngine(private val svc: AccessibilityService) {
         CtStore.setNow(svc, "${time()} · ${describe(det, c)}")
     }
 
-    private fun describe(det: Detection, c: Cfg): String {
+    /** maskTitle — для снимков: название канала или чата скрывается так же, как тексты элементов. */
+    private fun describe(det: Detection, c: Cfg, maskTitle: Boolean = false): String {
         val title = c.rules.book.service(det.service)?.title ?: det.service
         val v = core.last
         val type = v?.type ?: det.type
@@ -244,28 +264,45 @@ class ContentEngine(private val svc: AccessibilityService) {
             v.remainingSec != null -> " · осталось ${(v.remainingSec + 59) / 60} мин"
             else -> ""
         }
-        return "$title — ${type.title}" + (det.title?.let { " — «$it»" } ?: "") +
+        val name = det.title?.let { if (maskTitle) SnapshotText.mask(it, c.rules.book.allKeywords) else it }
+        return "$title — ${type.title}" + (name?.let { " — «$it»" } ?: "") +
             " · правило ${det.rule ?: "нет"}" + extra
     }
 
     private fun snapshot(det: Detection, now: Long, c: Cfg) {
         if (!Store.isDebug(svc)) return
         val screen = lastScreen ?: return
-        val sig = "${screen.pkg}|${det.type}|${det.rule}|${screen.nodes.size / 5}"
+        if (screen === lastSnapScreen) return // окно не перечитывалось — снимок был бы тем же
+        // Тот же экран при прокрутке — та же подпись: раньше число элементов менялось, и прокрутка
+        // одного экрана забивала все 6 снимков.
+        val sig = "${screen.pkg}|${det.type}|${det.rule}|${layoutSig(screen)}"
         val same = sig == lastSnapSig
         if (same && now - lastSnapAt < SNAP_EVERY_MS) return
         if (!same && now - lastSnapAt < SNAP_MIN_MS) return
         lastSnapAt = now
         lastSnapSig = sig
+        lastSnapScreen = screen
         val book = c.rules.book
+        val mask = CtStore.isMask(svc)
         val header = listOf(
             "SiteLimit снимок · ${time()} · ${screen.pkg} · ${screen.width}x${screen.height}",
-            "Сейчас: ${describe(det, c)}",
+            "Сейчас: ${describe(det, c, maskTitle = mask)}",
             "Правила: v${book.version} от ${book.updated}" + if (c.rules.custom) " (свои)" else " (встроенные)",
             "expect: ${det.service} ${det.type.id}",
         )
-        val text = SnapshotText.format(screen, header, book.allKeywords, CtStore.isMask(svc))
+        val text = SnapshotText.format(screen, header, book.allKeywords, mask)
         CtStore.pushSnapshot(svc, text, replaceFirst = same)
+    }
+
+    /** Подпись «вида» экрана: id (или классы) элементов шапки и нижней панели, выбранные и поля ввода. */
+    private fun layoutSig(screen: Screen): Int {
+        val h = screen.height
+        val parts = java.util.TreeSet<String>()
+        for (n in screen.nodes) {
+            if (h > 0 && n.top > 0.15 * h && n.top < 0.82 * h && !n.editable) continue
+            parts.add(n.id.ifEmpty { n.cls } + (if (n.selected) "*" else "") + (if (n.editable) "!" else ""))
+        }
+        return parts.hashCode()
     }
 
     private fun time(): String = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())

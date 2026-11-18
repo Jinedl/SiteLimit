@@ -28,6 +28,9 @@ class DebugActivity : Activity() {
     private lateinit var diagText: TextView
     private lateinit var ctText: TextView
     private lateinit var snapsButton: Button
+    /** Файл правил разбирается заново, только если настройки изменились (раньше — каждые 2 с). */
+    private var rules: CtStore.LoadedRules? = null
+    private var rulesVer = -1
     private val handler = Handler(Looper.getMainLooper())
     private val refresher = object : Runnable {
         override fun run() {
@@ -120,21 +123,29 @@ class DebugActivity : Activity() {
         super.onPause()
     }
 
+    private fun TextView.show(s: String) {
+        if (text.toString() != s) text = s
+    }
+
     private fun refresh() {
-        diagText.text = buildString {
+        diagText.show(buildString {
             append("Сейчас в браузере: ${Store.currentSite(this@DebugActivity) ?: "—"}")
             append("\nПоследняя проверка: ${Store.diag(this@DebugActivity) ?: "служба ещё не запускалась"}")
             append("\nПоследнее другое приложение: ${Store.diagOther(this@DebugActivity) ?: "—"}")
+        })
+        val ver = CtStore.configVersion(this)
+        val rules = this.rules?.takeIf { ver == rulesVer } ?: CtStore.loadRules(this).also {
+            this.rules = it
+            rulesVer = ver
         }
-        val rules = CtStore.loadRules(this)
-        ctText.text = buildString {
+        ctText.show(buildString {
             append("Бета: ${if (CtStore.isEnabled(this@DebugActivity)) "включена" else "выключена (снимков сервисов нет)"}")
             append("\nСейчас: ${CtStore.now(this@DebugActivity) ?: "—"}")
             append("\nПоследняя блокировка: ${CtStore.lastBlock(this@DebugActivity) ?: "—"}")
             append("\nПравила: v${rules.book.version} от ${rules.book.updated}, ${if (rules.custom) "свои" else "встроенные"}")
             rules.error?.let { append("\n⚠ $it") }
-        }
-        snapsButton.text = "Снимки сервисов (${CtStore.snapshots(this).size})"
+        })
+        snapsButton.show("Снимки сервисов (${CtStore.snapshotCount(this)})")
     }
 
     private fun textDialog(title: String, text: String, copyLabel: String = "Копировать", extra: Pair<String, () -> Unit>? = null) {

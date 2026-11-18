@@ -19,6 +19,8 @@ object CtStore {
     private fun u(c: Context): SharedPreferences = c.getSharedPreferences("ct_usage", Context.MODE_PRIVATE)
     /** Снимки — отдельным файлом: частые мелкие записи (строка «Сейчас») не переписывают их. */
     private fun sn(c: Context): SharedPreferences = c.getSharedPreferences("ct_snaps", Context.MODE_PRIVATE)
+    /** Строки «Сейчас» и «Последняя блокировка» пишутся часто — маленьким отдельным файлом. */
+    private fun st(c: Context): SharedPreferences = c.getSharedPreferences("ct_state", Context.MODE_PRIVATE)
 
     private fun changed(c: Context, block: SharedPreferences.Editor.() -> Unit) {
         val prefs = p(c)
@@ -118,11 +120,11 @@ object CtStore {
 
     // ---- состояние для экранов и отладки (не меняет cfg_ver) ----
 
-    fun now(c: Context): String? = p(c).getString("now", null)
-    fun setNow(c: Context, text: String) = p(c).edit().putString("now", text).apply()
+    fun now(c: Context): String? = st(c).getString("now", null)
+    fun setNow(c: Context, text: String) = st(c).edit().putString("now", text).apply()
 
-    fun lastBlock(c: Context): String? = p(c).getString("last_block", null)
-    fun setLastBlock(c: Context, text: String) = p(c).edit().putString("last_block", text).apply()
+    fun lastBlock(c: Context): String? = st(c).getString("last_block", null)
+    fun setLastBlock(c: Context, text: String) = st(c).edit().putString("last_block", text).apply()
 
     /** Недавние названия каналов и чатов: для быстрого добавления исключений. */
     class Recent(val service: String, val title: String, val type: ContentType)
@@ -144,23 +146,56 @@ object CtStore {
     fun isMask(c: Context): Boolean = p(c).getBoolean("mask", true)
     fun setMask(c: Context, on: Boolean) = p(c).edit().putBoolean("mask", on).apply()
 
-    /** Последние снимки (новые первыми). replaceFirst — заменить последний снимок того же экрана. */
-    fun snapshots(c: Context): List<String> {
-        val raw = sn(c).getString("snaps", null) ?: return emptyList()
-        return try {
-            MiniJson.parseList(raw).mapNotNull { it as? String }
+    // Снимки держатся в памяти (служба и экраны — один процесс) и пишутся на диск не чаще раза
+    // в SNAP_SAVE_MS: раньше каждый снимок (десятки КБ) переписывал файл раз в 1–3 с.
+    private const val SNAP_SAVE_MS = 10_000L
+    private var snapCache: MutableList<String>? = null
+    private var snapDirty = false
+    private var snapSavedAt = 0L
+
+    private fun snapList(c: Context): MutableList<String> {
+        snapCache?.let { return it }
+        val raw = sn(c).getString("snaps", null)
+        val list = try {
+            raw?.let { MiniJson.parseList(it).mapNotNull { s -> s as? String } } ?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }
+        return list.toMutableList().also { snapCache = it }
     }
 
+    /** Последние снимки (новые первыми). */
+    @Synchronized
+    fun snapshots(c: Context): List<String> = ArrayList(snapList(c))
+
+    @Synchronized
+    fun snapshotCount(c: Context): Int = snapList(c).size
+
+    /** replaceFirst — заменить последний снимок того же экрана. На диск — flushSnapshots. */
+    @Synchronized
     fun pushSnapshot(c: Context, text: String, replaceFirst: Boolean) {
-        val list = snapshots(c).toMutableList()
+        val list = snapList(c)
         if (replaceFirst && list.isNotEmpty()) list[0] = text else list.add(0, text)
-        sn(c).edit().putString("snaps", MiniJson.write(list.take(MAX_SNAPS))).apply()
+        while (list.size > MAX_SNAPS) list.removeAt(list.size - 1)
+        snapDirty = true
     }
 
-    fun clearSnapshots(c: Context) = sn(c).edit().remove("snaps").apply()
+    /** Записать снимки на диск: force — сразу (ушли из сервиса), иначе не чаще раза в SNAP_SAVE_MS. */
+    @Synchronized
+    fun flushSnapshots(c: Context, force: Boolean, now: Long) {
+        if (!snapDirty) return
+        if (!force && now - snapSavedAt < SNAP_SAVE_MS) return
+        snapSavedAt = now
+        snapDirty = false
+        sn(c).edit().putString("snaps", MiniJson.write(snapList(c))).apply()
+    }
+
+    @Synchronized
+    fun clearSnapshots(c: Context) {
+        snapCache = mutableListOf()
+        snapDirty = false
+        sn(c).edit().remove("snaps").apply()
+    }
 
     // ---- счётчики ----
 

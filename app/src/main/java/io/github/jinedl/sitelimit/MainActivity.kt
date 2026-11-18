@@ -31,6 +31,8 @@ class MainActivity : Activity() {
     private lateinit var ctNow: TextView
     private lateinit var ctLeft: TextView
     private var syncing = false
+    /** Что сейчас нарисовано в списке сайтов: список пересобирается только при изменении. */
+    private var listSig: String? = null
     private var ctBook: io.github.jinedl.sitelimit.ct.RuleBook? = null
     private val handler = Handler(Looper.getMainLooper())
     private val refresher = object : Runnable {
@@ -91,7 +93,13 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         ctBook = null
+        listSig = null
         handler.post(refresher)
+    }
+
+    /** Текст меняется только если другой: лишние перерисовки дёргают прокрутку. */
+    private fun TextView.show(s: String) {
+        if (text.toString() != s) text = s
     }
 
     /** Выключатель беты и короткая сводка: режим, что сейчас на экране, остаток. */
@@ -145,16 +153,17 @@ class MainActivity : Activity() {
     private fun refreshContentTypes() {
         val on = CtStore.isEnabled(this)
         if (ctSwitch.isChecked != on) setSwitch(on)
-        ctSection.visibility = if (on) View.VISIBLE else View.GONE
+        val vis = if (on) View.VISIBLE else View.GONE
+        if (ctSection.visibility != vis) ctSection.visibility = vis
         if (!on) return
         val active = CtGuard.active(this)
-        ctMode.text = "Режим: ${active.describe()}"
-        ctNow.text = "Последнее в сервисах: ${CtStore.now(this) ?: "—"}"
+        ctMode.show("Режим: ${active.describe()}")
+        ctNow.show("Последнее в сервисах: ${CtStore.now(this) ?: "—"}")
         val book = ctBook ?: CtStore.loadRules(this).book.also { ctBook = it }
         val ids = book.services.map { it.id }
         val rules = CtStore.modeRules(this, active.mode, ids)
-        ctLeft.text = "Остаток:\n" + Summary.remaining(rules, Ui.usage(this), Ui.today(), book.services.map { it.id to it.title })
-            .joinToString("\n") { "• $it" }
+        ctLeft.show("Остаток:\n" + Summary.remaining(rules, Ui.usage(this), Ui.today(), book.services.map { it.id to it.title })
+            .joinToString("\n") { "• $it" })
     }
 
     override fun onPause() {
@@ -172,20 +181,28 @@ class MainActivity : Activity() {
 
     private fun refresh() {
         val on = isServiceEnabled()
-        statusText.text =
-            if (on) "Служба: включена ✅" else "Служба: выключена ❌ — включите её в Специальных возможностях"
+        statusText.show(
+            if (on) "Служба: включена ✅" else "Служба: выключена ❌ — включите её в Специальных возможностях")
         refreshContentTypes()
 
-        listContainer.removeAllViews()
+        // Список сайтов пересобирается, только если что-то изменилось: раньше он пересоздавался
+        // каждые 2 с, и нажатия и прокрутка на главном экране дёргались.
         val limits = Store.limits(this)
+        val lines = limits.map { (domain, limit) ->
+            val usedMin = Store.usedSeconds(this, domain) / 60
+            "$domain — $usedMin из $limit мин" + if (usedMin >= limit) "  (исчерпан)" else ""
+        }
+        val sig = lines.joinToString("\n")
+        if (sig == listSig) return
+        listSig = sig
+        listContainer.removeAllViews()
         if (limits.isEmpty()) {
             listContainer.addView(row("Пока нет сайтов"))
             return
         }
-        for ((domain, limit) in limits) {
-            val usedMin = Store.usedSeconds(this, domain) / 60
-            val over = usedMin >= limit
-            val tv = row("$domain — $usedMin из $limit мин" + if (over) "  (исчерпан)" else "")
+        for ((i, entry) in limits.entries.withIndex()) {
+            val (domain, limit) = entry
+            val tv = row(lines[i])
             tv.setOnLongClickListener {
                 AlertDialog.Builder(this)
                     .setMessage("Удалить $domain?")
