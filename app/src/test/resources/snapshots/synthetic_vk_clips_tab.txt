@@ -1,0 +1,5 @@
+# expect: vk shorts
+pkg=com.vkontakte.android w=1080 h=2107
+y=0..1950 x=0..1080 FrameLayout
+y=1950..2100 x=432..648 FrameLayout desc="Клипы" sel click
+y=1950..2100 x=0..216 FrameLayout desc="Главная" click

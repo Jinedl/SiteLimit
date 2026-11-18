@@ -1,0 +1,4 @@
+# expect: telegram unknown
+pkg=org.telegram.messenger w=1080 h=2107
+y=90..180 x=150..900 TextView text="Настройки"
+y=300..400 x=0..1080 TextView text="Уведомления и звуки"

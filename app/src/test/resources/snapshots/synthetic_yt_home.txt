@@ -1,0 +1,6 @@
+# expect: youtube feed
+pkg=com.google.android.youtube w=1080 h=2107
+y=200..800 x=0..1080 ViewGroup desc="Лекция по матанализу, 1 час 20 минут"
+y=2000..2107 x=0..1080 FrameLayout id=pivot_bar
+y=2010..2100 x=0..216 Button desc="Главная" sel click
+y=2010..2100 x=216..432 Button desc="Shorts" click

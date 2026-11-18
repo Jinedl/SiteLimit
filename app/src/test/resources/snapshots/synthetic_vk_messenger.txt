@@ -1,0 +1,3 @@
+# expect: vk chat
+pkg=com.vk.im w=1080 h=2107
+y=90..180 x=150..900 TextView text="Сообщения"

@@ -1,0 +1,312 @@
+{
+  "version": 1,
+  "updated": "2026-11-18",
+  "note": "Признаки экранов для типов контента. status: snap — по снимку с телефона, src — по исходному коду приложения или открытых блокировщиков, guess — догадка. Правила сервиса проверяются сверху вниз, срабатывает первое. Формат — README, раздел «Файл правил».",
+  "keywords": [
+    "подписчик", "участник", "коммент", "в сети", "был", "печатает", "бот",
+    "сообщение", "telegram", "канал", "избранное", "поиск", "настройки", "истори",
+    "чаты", "звонки", "контакты", "профиль", "главная", "клипы", "видео", "мессенджер",
+    "сервисы", "новости", "рекомендации", "подписки", "лента", "shorts", "reel", "clip",
+    "subscriber", "member", "comment", "online", "message", "search", "home", "subscriptions", "library"
+  ],
+  "services": [
+    {
+      "id": "telegram",
+      "title": "Telegram",
+      "packages": [
+        {"name": "org.telegram.messenger", "status": "guess", "note": "Google Play (по каталогу mixrank, не по странице магазина)"},
+        {"name": "org.telegram.messenger.web", "status": "store", "note": "RuStore: rustore.ru/catalog/app/org.telegram.messenger.web"}
+      ],
+      "screens": [
+        {
+          "id": "tg_comments",
+          "type": "channel",
+          "status": "src",
+          "note": "Комментарии под постом — как канал (kb/04). Заголовок «N комментариев» или «Комментарии» (ChatActivity, CommentsTitle).",
+          "any": [
+            {"textRe": "^(\\d[\\d\\s.,]*[KКMМ]?\\s+)?(комментари|comment)", "yMax": 0.12},
+            {"descRe": "^(\\d[\\d\\s.,]*[KКMМ]?\\s+)?(комментари|comment)", "yMax": 0.12}
+          ]
+        },
+        {
+          "id": "tg_channel",
+          "type": "channel",
+          "status": "src",
+          "note": "Шапка чата: описание «название\\nподзаголовок», у канала подзаголовок «N подписчиков» или «публичный/частный канал» (ChatAvatarContainer).",
+          "any": [
+            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.12},
+            {"descRe": "\\n\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.12},
+            {"textRe": "^(публичный|частный) канал$|^(public|private) channel$", "yMax": 0.12},
+            {"descRe": "\\n((публичный|частный) канал|(public|private) channel)", "yMax": 0.12}
+          ],
+          "title": [
+            {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)|^(публичный|частный) канал$|^(public|private) channel$", "yMax": 0.12}, "pick": "above", "field": "text"},
+            {"from": {"descRe": "\\n", "yMax": 0.12}, "field": "desc", "re": "^([^\\n]+)"}
+          ]
+        },
+        {
+          "id": "tg_group",
+          "type": "chat",
+          "status": "src",
+          "note": "Группа: подзаголовок «N участников» (иногда «, M в сети»). Большой чат можно перевести в каналы исключением.",
+          "any": [
+            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.12},
+            {"descRe": "\\n\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.12}
+          ],
+          "title": [
+            {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.12}, "pick": "above", "field": "text"},
+            {"from": {"descRe": "\\n", "yMax": 0.12}, "field": "desc", "re": "^([^\\n]+)"}
+          ]
+        },
+        {
+          "id": "tg_search",
+          "type": "service",
+          "status": "guess",
+          "note": "Поле поиска вверху экрана.",
+          "all": [{"editable": true, "yMax": 0.15}]
+        },
+        {
+          "id": "tg_chat",
+          "type": "chat",
+          "status": "guess",
+          "note": "Личный чат, «Избранное», бот: поле ввода сообщения внизу.",
+          "all": [{"editable": true, "yMin": 0.6}],
+          "title": {"from": {"descRe": "\\n", "yMax": 0.12}, "field": "desc", "re": "^([^\\n]+)"}
+        },
+        {
+          "id": "tg_chat_list",
+          "type": "chat",
+          "status": "guess",
+          "note": "Список чатов: заголовок «Telegram» или «Соединение…».",
+          "any": [
+            {"text": "Telegram", "yMax": 0.12},
+            {"textRe": "^(соединение|ожидание сети|обновление|connecting|waiting for network|updating)", "yMax": 0.12}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "max",
+      "title": "Max",
+      "packages": [
+        {"name": "ru.oneme.app", "status": "store", "note": "RuStore: rustore.ru/catalog/app/ru.oneme.app"}
+      ],
+      "screens": [
+        {
+          "id": "max_comments",
+          "type": "channel",
+          "status": "guess",
+          "any": [{"anyRe": "^(\\d[\\d\\s.,]*\\s+)?коммент", "yMax": 0.15}]
+        },
+        {
+          "id": "max_channel",
+          "type": "channel",
+          "status": "guess",
+          "note": "Как в Telegram: подзаголовок «N подписчиков» в шапке.",
+          "any": [
+            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.15},
+            {"descRe": "\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.15}
+          ],
+          "title": {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|subscriber)", "yMax": 0.15}, "pick": "above", "field": "text"}
+        },
+        {
+          "id": "max_group",
+          "type": "chat",
+          "status": "guess",
+          "any": [
+            {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.15},
+            {"descRe": "\\d[\\d\\s.,]*[KКMМ]?\\s*участник", "yMax": 0.15}
+          ],
+          "title": {"from": {"textRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(участник|member)", "yMax": 0.15}, "pick": "above", "field": "text"}
+        },
+        {
+          "id": "max_search",
+          "type": "service",
+          "status": "guess",
+          "all": [{"editable": true, "yMax": 0.15}]
+        },
+        {
+          "id": "max_chat",
+          "type": "chat",
+          "status": "guess",
+          "all": [{"editable": true, "yMin": 0.6}]
+        },
+        {
+          "id": "max_tabs_chat",
+          "type": "chat",
+          "status": "guess",
+          "note": "Нижние вкладки «Чаты», «Звонки», «Контакты».",
+          "any": [{"selected": true, "anyRe": "^(чаты|звонки|контакты|chats|calls|contacts)", "yMin": 0.82}]
+        },
+        {
+          "id": "max_tabs_service",
+          "type": "service",
+          "status": "guess",
+          "any": [{"selected": true, "anyRe": "^(профиль|настройки|profile|settings)", "yMin": 0.82}]
+        }
+      ]
+    },
+    {
+      "id": "vk",
+      "title": "VK",
+      "packages": [
+        {"name": "com.vkontakte.android", "status": "store", "note": "RuStore: rustore.ru/catalog/app/com.vkontakte.android"},
+        {"name": "com.vk.im", "status": "guess", "note": "VK Мессенджер (по каталогу appgoblin)"},
+        {"name": "com.vk.vkvideo", "status": "guess", "note": "VK Видео"}
+      ],
+      "screens": [
+        {
+          "id": "vk_messenger_app",
+          "type": "chat",
+          "status": "guess",
+          "note": "Приложение VK Мессенджер — всё переписка.",
+          "packages": ["com.vk.im"]
+        },
+        {
+          "id": "vk_video_app_clips",
+          "type": "shorts",
+          "status": "guess",
+          "packages": ["com.vk.vkvideo"],
+          "any": [{"idHas": "clip"}, {"selected": true, "anyHas": "клипы", "yMin": 0.82}]
+        },
+        {
+          "id": "vk_video_app",
+          "type": "video",
+          "status": "guess",
+          "packages": ["com.vk.vkvideo"]
+        },
+        {
+          "id": "vk_clips",
+          "type": "shorts",
+          "status": "guess",
+          "note": "Клипы: вкладка «Клипы» или элементы с clip в id.",
+          "any": [
+            {"selected": true, "anyRe": "^(vk )?клипы|^clips", "yMin": 0.82},
+            {"idHas": "clips_viewer"},
+            {"idHas": "clip_feed"},
+            {"idHas": "clips_pager"}
+          ]
+        },
+        {
+          "id": "vk_video",
+          "type": "video",
+          "status": "guess",
+          "any": [
+            {"idHas": "video_player"},
+            {"idHas": "videoplayer"},
+            {"selected": true, "anyRe": "^(vk )?видео|^video", "yMin": 0.82}
+          ]
+        },
+        {
+          "id": "vk_comments",
+          "type": "channel",
+          "status": "guess",
+          "note": "Комментарии — как канал (kb/04).",
+          "any": [{"anyRe": "^(\\d[\\d\\s.,]*\\s+)?коммент", "yMax": 0.15}]
+        },
+        {
+          "id": "vk_community",
+          "type": "channel",
+          "status": "guess",
+          "note": "Страница сообщества: «N подписчиков» или «N участников» в верхней половине.",
+          "any": [{"anyRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|участник|subscriber|follower|member)", "yMax": 0.5}],
+          "title": {"from": {"anyRe": "^\\d[\\d\\s.,]*[KКMМ]?\\s*(подписчик|участник|subscriber|follower|member)", "yMax": 0.5}, "pick": "above", "field": "text"}
+        },
+        {
+          "id": "vk_search",
+          "type": "service",
+          "status": "guess",
+          "all": [{"editable": true, "yMax": 0.15}]
+        },
+        {
+          "id": "vk_chat",
+          "type": "chat",
+          "status": "guess",
+          "any": [
+            {"editable": true, "yMin": 0.6},
+            {"selected": true, "anyRe": "^(мессенджер|сообщения|messenger|messages)", "yMin": 0.82}
+          ]
+        },
+        {
+          "id": "vk_feed",
+          "type": "feed",
+          "status": "guess",
+          "any": [
+            {"selected": true, "anyRe": "^(главная|новости|home|news)", "yMin": 0.82},
+            {"selected": true, "anyRe": "^(новости|рекомендации|для вас|news|for you)", "yMax": 0.2}
+          ]
+        },
+        {
+          "id": "vk_service",
+          "type": "service",
+          "status": "guess",
+          "any": [{"selected": true, "anyRe": "^(сервисы|профиль|services|profile)", "yMin": 0.82}]
+        }
+      ]
+    },
+    {
+      "id": "youtube",
+      "title": "YouTube",
+      "packages": [
+        {"name": "com.google.android.youtube", "status": "guess", "note": "Google Play (по каталогу mixrank и коду блокировщиков)"}
+      ],
+      "screens": [
+        {
+          "id": "yt_shorts",
+          "type": "shorts",
+          "status": "src",
+          "note": "id плеера Shorts из открытых блокировщиков (Shorts Blocker: reel_progress_bar; статьи: reel_recycler, shorts_player_container).",
+          "any": [
+            {"id": "reel_progress_bar"},
+            {"id": "reel_recycler"},
+            {"id": "reel_player_page_container"},
+            {"id": "shorts_player_container"},
+            {"id": "reel_watch_player"}
+          ]
+        },
+        {
+          "id": "yt_video",
+          "type": "video",
+          "status": "guess",
+          "note": "Страница видео: плеер. Мини-плеер поверх ленты может давать ошибку — нужен снимок.",
+          "any": [
+            {"idHas": "watch_player"},
+            {"id": "player_view"},
+            {"idHas": "watch_while"},
+            {"id": "youtube_controls_overlay"},
+            {"idHas": "player_overlay"}
+          ]
+        },
+        {
+          "id": "yt_channel",
+          "type": "channel",
+          "status": "guess",
+          "note": "Страница канала: @имя и число подписчиков вверху.",
+          "all": [
+            {"anyRe": "подписчик|subscriber", "yMax": 0.5},
+            {"anyRe": "^@\\S+", "yMax": 0.5}
+          ]
+        },
+        {
+          "id": "yt_search",
+          "type": "service",
+          "status": "guess",
+          "all": [{"editable": true, "yMax": 0.15}]
+        },
+        {
+          "id": "yt_feed",
+          "type": "feed",
+          "status": "guess",
+          "note": "Нижние вкладки «Главная», «Подписки».",
+          "any": [{"selected": true, "anyRe": "^(главная|подписки|home|subscriptions)", "yMin": 0.82}]
+        },
+        {
+          "id": "yt_you",
+          "type": "service",
+          "status": "guess",
+          "any": [{"selected": true, "anyRe": "^(вы|библиотека|you|library)$", "yMin": 0.82}]
+        }
+      ]
+    }
+  ]
+}

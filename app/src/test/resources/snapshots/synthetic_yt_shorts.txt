@@ -1,0 +1,9 @@
+# expect: youtube shorts
+# id из открытых блокировщиков Shorts, не снимок с телефона
+pkg=com.google.android.youtube w=1080 h=2107
+y=0..2107 x=0..1080 RecyclerView id=reel_recycler
+y=0..2107 x=0..1080 FrameLayout id=reel_player_page_container
+y=1900..1990 x=0..1080 TextView text="Подписаться" click
+y=2000..2107 x=0..1080 FrameLayout id=pivot_bar
+y=2010..2100 x=0..216 Button desc="Главная" click
+y=2010..2100 x=216..432 Button desc="Shorts" sel click

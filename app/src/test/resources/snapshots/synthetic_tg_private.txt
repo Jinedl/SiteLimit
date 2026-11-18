@@ -1,0 +1,7 @@
+# expect: telegram chat Роман
+pkg=org.telegram.messenger w=1080 h=2107
+y=70..200 x=110..800 FrameLayout desc="Роман\nв сети" click
+y=80..130 x=230..700 TextView text="Роман"
+y=135..175 x=230..700 TextView text="в сети"
+y=300..420 x=40..900 ViewGroup desc="у нас уже 100 подписчиков, 12:01"
+y=1990..2090 x=120..900 EditText hint="Сообщение" click edit

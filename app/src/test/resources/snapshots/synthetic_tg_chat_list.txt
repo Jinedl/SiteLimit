@@ -1,0 +1,8 @@
+# expect: telegram chat
+pkg=org.telegram.messenger w=1080 h=2107
+y=63..210 x=0..1080 FrameLayout
+y=100..170 x=150..600 TextView text="Telegram"
+y=90..180 x=950..1060 ImageButton desc="Поиск" click
+y=230..330 x=0..1080 ViewGroup desc="Роман, привет, 12:01" click
+y=330..430 x=0..1080 ViewGroup desc="Новости Москвы, канал, 3 новых" click
+y=1850..2000 x=900..1060 ImageView desc="Новое сообщение" click

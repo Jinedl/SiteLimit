@@ -1,0 +1,11 @@
+# expect: telegram channel Новости Москвы
+# образец по исходному коду Telegram (ChatAvatarContainer), не снимок с телефона
+pkg=org.telegram.messenger w=1080 h=2107
+y=63..210 x=0..1080 FrameLayout
+y=70..200 x=110..800 FrameLayout desc="Новости Москвы\n12 345 подписчиков" click
+y=80..130 x=230..700 TextView text="Новости Москвы"
+y=135..175 x=230..700 TextView text="12 345 подписчиков"
+y=230..900 x=40..1040 ViewGroup desc="Новости Москвы, Сегодня в городе тепло"
+y=900..960 x=40..1040 TextView text="128 комментариев"
+y=1980..2100 x=0..1080 FrameLayout
+y=2000..2080 x=300..780 TextView text="Отключить звук" click

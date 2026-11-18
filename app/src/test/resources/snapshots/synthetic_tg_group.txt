@@ -1,0 +1,7 @@
+# expect: telegram chat Группа 616
+pkg=org.telegram.messenger w=1080 h=2107
+y=70..200 x=110..800 FrameLayout desc="Группа 616\n1 024 участника, 17 в сети" click
+y=80..130 x=230..700 TextView text="Группа 616"
+y=135..175 x=230..700 TextView text="1 024 участника, 17 в сети"
+y=400..520 x=40..900 ViewGroup desc="Аня, расписание на завтра, 10:15"
+y=1990..2090 x=120..900 EditText hint="Сообщение" click edit

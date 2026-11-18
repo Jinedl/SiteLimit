@@ -1,0 +1,4 @@
+# expect: telegram service
+pkg=org.telegram.messenger w=1080 h=2107
+y=90..180 x=150..900 EditText hint="Поиск" edit
+y=230..330 x=0..1080 ViewGroup desc="Роман" click
