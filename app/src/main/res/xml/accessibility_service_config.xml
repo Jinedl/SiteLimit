@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Служба смотрит только на Яндекс Браузер (обычный, Lite, бета, альфа) и «Яндекс — с Алисой». -->
+<!-- События — только от Яндекс Браузера (обычный, Lite, бета, альфа) и «Яндекс — с Алисой».
+     При включённой бете «Типы контента» служба сама добавляет пакеты Telegram, Max, VK, YouTube
+     (setServiceInfo, список — в файле правил и настройках); при выключенной — снова только браузеры. -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
     android:accessibilityFeedbackType="feedbackGeneric"

@@ -28,7 +28,21 @@
         <!-- Отладка: вход только долгим нажатием на версию на главном экране. -->
         <activity
             android:name=".DebugActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Типы контента (бета). -->
+        <activity
+            android:name=".RulesActivity"
             android:exported="false" />
+        <activity
+            android:name=".ExceptionsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ModesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".LimitService"

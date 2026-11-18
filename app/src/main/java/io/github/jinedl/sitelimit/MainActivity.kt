@@ -8,16 +8,30 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import io.github.jinedl.sitelimit.ct.CtGuard
+import io.github.jinedl.sitelimit.ct.CtStore
+import io.github.jinedl.sitelimit.ct.StrictGuard
+import io.github.jinedl.sitelimit.ct.Summary
+import io.github.jinedl.sitelimit.ct.Ui
 
 class MainActivity : Activity() {
 
     private lateinit var statusText: TextView
     private lateinit var listContainer: LinearLayout
+    private lateinit var ctSwitch: CheckBox
+    private lateinit var ctSection: LinearLayout
+    private lateinit var ctMode: TextView
+    private lateinit var ctNow: TextView
+    private lateinit var ctLeft: TextView
+    private var syncing = false
+    private var ctBook: io.github.jinedl.sitelimit.ct.RuleBook? = null
     private val handler = Handler(Looper.getMainLooper())
     private val refresher = object : Runnable {
         override fun run() {
@@ -39,12 +53,16 @@ class MainActivity : Activity() {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
 
+        setupContentTypes()
+
         findViewById<Button>(R.id.btnAdd).setOnClickListener {
             val domain = Store.normalizeDomain(inputDomain.text)
             val minutes = inputMinutes.text.toString().toIntOrNull()
             when {
                 domain == null -> toast("Не похоже на адрес сайта, пример: youtube.com")
                 minutes == null || minutes !in 1..1440 -> toast("Лимит — от 1 до 1440 минут")
+                // Упрямый режим (только при включённой бете): лимит сайта нельзя увеличить.
+                CtGuard.refuse(this, StrictGuard.weakerSiteLimit(Store.limits(this)[domain], minutes)) -> Unit
                 else -> {
                     Store.setLimit(this, domain, minutes)
                     inputDomain.text.clear()
@@ -72,7 +90,71 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        ctBook = null
         handler.post(refresher)
+    }
+
+    /** Выключатель беты и короткая сводка: режим, что сейчас на экране, остаток. */
+    private fun setupContentTypes() {
+        ctSwitch = findViewById(R.id.ctSwitch)
+        ctSection = findViewById(R.id.ctSection)
+        ctMode = Ui.text(this, "", 16f, bold = true)
+        ctNow = Ui.text(this, "", 14f)
+        ctLeft = Ui.text(this, "", 14f)
+        ctSection.addView(ctMode)
+        ctSection.addView(ctNow)
+        ctSection.addView(ctLeft)
+        ctSection.addView(Ui.button(this, "Лимиты по типам") { startActivity(Intent(this, RulesActivity::class.java)) })
+        ctSection.addView(Ui.button(this, "Исключения") { startActivity(Intent(this, ExceptionsActivity::class.java)) })
+        ctSection.addView(Ui.button(this, "Режимы, расписание, пресеты") { startActivity(Intent(this, ModesActivity::class.java)) })
+        ctSwitch.setOnCheckedChangeListener { _, on ->
+            if (syncing) return@setOnCheckedChangeListener
+            if (!on) {
+                if (CtGuard.refuse(this, weaker = true)) {
+                    setSwitch(true)
+                    return@setOnCheckedChangeListener
+                }
+                CtStore.setEnabled(this, false)
+                refresh()
+                return@setOnCheckedChangeListener
+            }
+            setSwitch(false)
+            AlertDialog.Builder(this)
+                .setTitle("Типы контента (бета)")
+                .setMessage("Служба начнёт смотреть экраны Telegram, Max, VK и YouTube: какие элементы на экране " +
+                    "(канал, чат, лента, ролик), чтобы считать время по типам и закрывать то, на что исчерпан лимит.\n\n" +
+                    "Тексты переписки не сохраняются; на телефоне хранятся только минуты, открытия, названия каналов и чатов " +
+                    "для исключений и снимки отладки, если вы их включите. В интернет ничего не уходит.\n\n" +
+                    "Выключите галочку — приложение работает как 0.9 (только сайты).")
+                .setPositiveButton("Включить") { _, _ ->
+                    CtStore.setEnabled(this, true)
+                    setSwitch(true)
+                    refresh()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+
+    private fun setSwitch(on: Boolean) {
+        syncing = true
+        ctSwitch.isChecked = on
+        syncing = false
+    }
+
+    private fun refreshContentTypes() {
+        val on = CtStore.isEnabled(this)
+        if (ctSwitch.isChecked != on) setSwitch(on)
+        ctSection.visibility = if (on) View.VISIBLE else View.GONE
+        if (!on) return
+        val active = CtGuard.active(this)
+        ctMode.text = "Режим: ${active.describe()}"
+        ctNow.text = "Последнее в сервисах: ${CtStore.now(this) ?: "—"}"
+        val book = ctBook ?: CtStore.loadRules(this).book.also { ctBook = it }
+        val ids = book.services.map { it.id }
+        val rules = CtStore.modeRules(this, active.mode, ids)
+        ctLeft.text = "Остаток:\n" + Summary.remaining(rules, Ui.usage(this), Ui.today(), book.services.map { it.id to it.title })
+            .joinToString("\n") { "• $it" }
     }
 
     override fun onPause() {
@@ -92,6 +174,7 @@ class MainActivity : Activity() {
         val on = isServiceEnabled()
         statusText.text =
             if (on) "Служба: включена ✅" else "Служба: выключена ❌ — включите её в Специальных возможностях"
+        refreshContentTypes()
 
         listContainer.removeAllViews()
         val limits = Store.limits(this)
@@ -107,6 +190,7 @@ class MainActivity : Activity() {
                 AlertDialog.Builder(this)
                     .setMessage("Удалить $domain?")
                     .setPositiveButton("Удалить") { _, _ ->
+                        if (CtGuard.refuse(this, StrictGuard.weakerSiteLimit(limit, null))) return@setPositiveButton
                         Store.removeLimit(this, domain)
                         refresh()
                     }
