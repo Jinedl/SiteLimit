@@ -51,3 +51,8 @@ android {
         jvmTarget = "17"
     }
 }
+
+dependencies {
+    // Только для JVM-тестов в Actions, в APK не попадает.
+    testImplementation("junit:junit:4.13.2")
+}
