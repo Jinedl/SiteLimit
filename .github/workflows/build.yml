@@ -1,8 +1,11 @@
 name: Сборка APK
 
+# main: тесты, сборка, обычный Release vX.Y (как раньше).
+# feature/**: тесты и сборка; если versionName с суффиксом (0.10-beta1) — prerelease vX.Y-betaN.
+# Prerelease не становится «latest», ссылка releases/latest ведёт на обычную версию.
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
     paths-ignore: ["**.md"]
   workflow_dispatch:
 
@@ -10,7 +13,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: build
+  group: build-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -31,7 +34,16 @@ jobs:
         run: |
           V=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
           echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "Версия: $V"
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            CH=release
+          elif [[ "$V" == *-* ]]; then
+            CH=prerelease
+          else
+            CH=none
+            echo "::notice title=Без публикации::Ветка $GITHUB_REF_NAME, версия $V без суффикса (-betaN): APK собирается, но не публикуется."
+          fi
+          echo "channel=$CH" >> "$GITHUB_OUTPUT"
+          echo "Версия: $V, ветка: $GITHUB_REF_NAME, публикация: $CH"
 
       - name: Ключ подписи
         id: key
@@ -52,12 +64,36 @@ jobs:
           echo "SIGNING_KEYSTORE=$RUNNER_TEMP/release.p12" >> "$GITHUB_ENV"
           echo "signed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Сборка release-APK
+      - name: Тесты и сборка release-APK
         env:
           SIGNING_PASSWORD: ${{ steps.key.outputs.signed == 'true' && secrets.SIGNING_PASSWORD || '' }}
         run: |
           set -o pipefail
-          ./gradlew --no-daemon assembleRelease 2>&1 | tee build.log
+          ./gradlew --no-daemon testReleaseUnitTest assembleRelease 2>&1 | tee build.log
+
+      - name: Итог тестов
+        if: always()
+        run: |
+          python3 - <<'EOF'
+          import glob, xml.etree.ElementTree as ET
+          total = failed = 0
+          shown = 0
+          for f in sorted(glob.glob('app/build/test-results/**/*.xml', recursive=True)):
+              for tc in ET.parse(f).getroot().iter('testcase'):
+                  total += 1
+                  bad = tc.findall('failure') + tc.findall('error')
+                  if not bad:
+                      continue
+                  failed += 1
+                  if shown < 10:
+                      shown += 1
+                      m = (bad[0].get('message') or bad[0].text or '').strip()
+                      m = m.replace('%', '%25').replace('\r', '').replace('\n', '%0A')[:900]
+                      cls = tc.get('classname', '').split('.')[-1]
+                      print(f"::error title=Тест {cls}.{tc.get('name')}::{m}")
+          if total:
+              print(f"::notice title=Тесты::{total - failed} из {total} прошли")
+          EOF
 
       - name: Ошибки сборки — в аннотации
         if: failure()
@@ -77,15 +113,23 @@ jobs:
           "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk
 
       - name: Публикация в GitHub Release
-        if: steps.key.outputs.signed == 'true'
+        if: steps.key.outputs.signed == 'true' && steps.ver.outputs.channel != 'none'
         env:
           GH_TOKEN: ${{ github.token }}
           V: ${{ steps.ver.outputs.version }}
+          CH: ${{ steps.ver.outputs.channel }}
         run: |
           TAG="v$V"
           cp app/build/outputs/apk/release/app-release.apk "SiteLimit-$V.apk"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "::notice title=Уже опубликовано::Release $TAG уже есть. Чтобы выпустить новую версию, увеличьте versionCode и versionName."
+          elif [ "$CH" = "prerelease" ]; then
+            gh release create "$TAG" "SiteLimit-$V.apk" \
+              --target "$GITHUB_SHA" \
+              --prerelease \
+              --title "SiteLimit $V (бета)" \
+              --notes "Бета из ветки $GITHUB_REF_NAME, не для всех. APK для установки на телефон: нажмите на SiteLimit-$V.apk ниже."
+            echo "::notice title=Опубликовано (prerelease)::https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG"
           else
             gh release create "$TAG" "SiteLimit-$V.apk" \
               --target "$GITHUB_SHA" \
