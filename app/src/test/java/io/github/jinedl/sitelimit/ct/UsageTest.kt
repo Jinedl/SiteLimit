@@ -216,6 +216,20 @@ class UsageTest {
     }
 
     @Test
+    fun drainChangesGivesOnlyNewValuesAndRemovedKeys() {
+        val b = UsageBook()
+        b.load(mapOf(UsageBook.key("2026-01-01", tgChat, 's') to 9, UsageBook.key(d1, tgChat, 's') to 1))
+        b.addSeconds(d1, tgChat, 4)
+        b.addOpen(d1, tgChannel)
+        b.cleanup("2026-09-19")
+        val (upd, rem) = b.drainChanges()
+        assertEquals(mapOf(UsageBook.key(d1, tgChat, 's') to 5, UsageBook.key(d1, tgChannel, 'o') to 1), upd)
+        assertEquals(setOf(UsageBook.key("2026-01-01", tgChat, 's')), rem)
+        assertFalse(b.dirty)
+        assertEquals(Pair(emptyMap<String, Int>(), emptySet<String>()), b.drainChanges())
+    }
+
+    @Test
     fun exportAndLoad() {
         val b = UsageBook()
         b.addSeconds(d1, tgChat, 42)

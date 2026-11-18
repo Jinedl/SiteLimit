@@ -7,6 +7,9 @@ import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import io.github.jinedl.sitelimit.ct.ContentEngine
+import io.github.jinedl.sitelimit.ct.CtStore
+import io.github.jinedl.sitelimit.ct.ExKind
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -14,6 +17,9 @@ import java.util.Locale
 /**
  * Раз в секунду смотрит, открыт ли Яндекс Браузер, читает адресную строку
  * и добавляет секунду к сайту с лимитом. При превышении — выход на главный экран.
+ *
+ * Если включён выключатель «Типы контента (бета)», дополнительно работает ContentEngine:
+ * экраны Telegram, Max, VK, YouTube. Выключатель выключен — всё как в v0.9.
  */
 class LimitService : AccessibilityService() {
 
@@ -55,6 +61,13 @@ class LimitService : AccessibilityService() {
     private var overSite: String? = null
     private var overSince = 0L
 
+    /** Типы контента (бета). Создаётся при подключении службы, работает только при включённом выключателе. */
+    private var ct: ContentEngine? = null
+    /** Какие пакеты присылают события. Сначала — как в accessibility_service_config.xml (только браузеры). */
+    private var appliedPackages: Set<String> = BROWSERS
+    private var ctFast = false
+    private var lastCtVersion = -1
+
     private val tick = object : Runnable {
         override fun run() {
             try {
@@ -63,27 +76,61 @@ class LimitService : AccessibilityService() {
                 Log.w(TAG, "tick failed", e)
             }
             // Пока идут секунды на переход — проверяем чаще, чтобы свернуть точно через 1,5 с.
-            handler.postDelayed(this, if (overSite != null) FAST_TICK_MS else TICK_MS)
+            handler.postDelayed(this, if (overSite != null || ctFast) FAST_TICK_MS else TICK_MS)
         }
     }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
         Store.cleanupOldUsage(this)
+        ct = try {
+            ContentEngine(this)
+        } catch (e: Exception) {
+            Log.w(TAG, "ContentEngine failed", e)
+            null
+        }
+        syncPackages(CtStore.isEnabled(this))
         lastTick = SystemClock.elapsedRealtime()
         handler.removeCallbacks(tick)
         handler.post(tick)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // События не нужны: всё делается по таймеру в onTick().
+        // Для сайтов события не нужны: всё по таймеру в onTick(). Для типов контента событие только
+        // помечает «экран мог измениться» — разбор окна в onTick и не чаще раза в 0,4 с.
+        if (event != null && appliedPackages.size > BROWSERS.size) {
+            try {
+                ct?.onEvent(event)
+            } catch (e: Exception) {
+                Log.w(TAG, "event failed", e)
+            }
+        }
     }
 
     override fun onInterrupt() {}
 
     override fun onDestroy() {
         handler.removeCallbacks(tick)
+        ct?.destroy()
         super.onDestroy()
+    }
+
+    /**
+     * Какие приложения присылают события службе: браузеры (как в v0.9) и, при включённой бете,
+     * пакеты сервисов из файла правил и настроек. Читать активное окно это не мешает (kb/02).
+     */
+    private fun syncPackages(ctOn: Boolean) {
+        val wanted = LinkedHashSet<String>(BROWSERS)
+        if (ctOn) ct?.let { wanted.addAll(it.packages()) }
+        if (wanted == appliedPackages) return
+        try {
+            val info = serviceInfo ?: return
+            info.packageNames = wanted.toTypedArray()
+            serviceInfo = info
+            appliedPackages = wanted
+        } catch (e: Exception) {
+            Log.w(TAG, "setServiceInfo failed", e)
+        }
     }
 
     private fun setCurrent(host: String?) {
@@ -117,6 +164,24 @@ class LimitService : AccessibilityService() {
             if (pkg != null && pkg != packageName) Store.setDiagOther(this, "$time · $pkg")
         }
 
+        // Типы контента (бета): выключатель выключен — этот блок не работает, всё как в v0.9.
+        val ctOn = CtStore.isEnabled(this)
+        ctFast = false
+        if (ctOn) {
+            if (CtStore.configVersion(this) != lastCtVersion) {
+                lastCtVersion = CtStore.configVersion(this)
+                syncPackages(true)
+            }
+            try {
+                ctFast = ct?.tick(root, pkg, screenOn, now, elapsed) ?: false
+            } catch (e: Exception) {
+                Log.w(TAG, "content tick failed", e)
+            }
+        } else if (appliedPackages.size > BROWSERS.size) {
+            syncPackages(false)
+            ct?.flush()
+        }
+
         // Экран выключен — время не считается.
         if (!screenOn) {
             pendingMs = 0
@@ -145,8 +210,26 @@ class LimitService : AccessibilityService() {
 
         val host = currentHost
         val limits = Store.limits(this)
-        val site = host?.let { Store.matchLimit(it, limits.keys) }
-        val limitMin = site?.let { limits[it] }
+        var site = host?.let { Store.matchLimit(it, limits.keys) }
+        var limitMin = site?.let { limits[it] }
+        var deny = false
+        // Исключения сайтов (только при включённой бете): «всегда можно» снимает лимит,
+        // «всегда нельзя» — как лимит 0 минут (те же 1,5 с на переход).
+        if (ctOn && host != null) {
+            val ex = ct?.siteException(host)
+            when (ex?.kind) {
+                ExKind.ALLOW -> {
+                    site = null
+                    limitMin = null
+                }
+                ExKind.DENY -> {
+                    site = ex.key
+                    limitMin = 0
+                    deny = true
+                }
+                else -> Unit
+            }
+        }
         if (site == null || limitMin == null) {
             overSite = null
             return
@@ -168,11 +251,11 @@ class LimitService : AccessibilityService() {
         }
         if (now - overSince >= GRACE_MS) {
             overSite = null
-            block(site, limitMin, now)
+            block(site, limitMin, now, deny)
         }
     }
 
-    private fun block(site: String, limitMin: Int, now: Long) {
+    private fun block(site: String, limitMin: Int, now: Long, deny: Boolean = false) {
         performGlobalAction(GLOBAL_ACTION_HOME)
         if (now - lastMessage >= MESSAGE_EVERY_MS) {
             lastMessage = now
@@ -181,7 +264,10 @@ class LimitService : AccessibilityService() {
             // Чуть позже, чтобы его не перекрыл запуск главного экрана.
             handler.postDelayed({
                 try {
-                    startActivity(BlockedActivity.intent(this, site, limitMin))
+                    startActivity(
+                        if (deny) BlockedActivity.contentIntent(this, "$site — всегда нельзя (исключение).\nУбрать можно в SiteLimit → Исключения.")
+                        else BlockedActivity.intent(this, site, limitMin)
+                    )
                 } catch (e: Exception) {
                     Log.w(TAG, "BlockedActivity failed", e)
                 }

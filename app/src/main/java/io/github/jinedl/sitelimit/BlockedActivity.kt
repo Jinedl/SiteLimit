@@ -10,23 +10,32 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 
-/** Окно «Лимит исчерпан», которое служба показывает поверх главного экрана. */
+/** Окно «Лимит исчерпан», которое служба показывает поверх главного экрана или приложения. */
 class BlockedActivity : Activity() {
 
     companion object {
         private const val EXTRA_SITE = "site"
         private const val EXTRA_LIMIT = "limit"
+        private const val EXTRA_BODY = "body"
 
+        /** Сайт v0.9: «сайт — N мин на сегодня уже потрачено». */
         fun intent(c: Context, site: String, limitMin: Int): Intent =
             Intent(c, BlockedActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .putExtra(EXTRA_SITE, site)
                 .putExtra(EXTRA_LIMIT, limitMin)
+
+        /** Типы контента и исключения: готовый текст (сервис, тип, причина, когда снова можно). */
+        fun contentIntent(c: Context, body: String): Intent =
+            Intent(c, BlockedActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                .putExtra(EXTRA_BODY, body)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFinishOnTouchOutside(false)
+        val custom = intent.getStringExtra(EXTRA_BODY)
         val site = intent.getStringExtra(EXTRA_SITE) ?: "сайт"
         val limit = intent.getIntExtra(EXTRA_LIMIT, 0)
         val pad = (24 * resources.displayMetrics.density).toInt()
@@ -37,7 +46,7 @@ class BlockedActivity : Activity() {
             setTypeface(typeface, Typeface.BOLD)
         }
         val body = TextView(this).apply {
-            text = "$site — $limit мин на сегодня уже потрачено.\nСнова можно будет завтра."
+            text = custom ?: "$site — $limit мин на сегодня уже потрачено.\nСнова можно будет завтра."
             textSize = 17f
             setPadding(0, pad / 2, 0, pad / 2)
         }

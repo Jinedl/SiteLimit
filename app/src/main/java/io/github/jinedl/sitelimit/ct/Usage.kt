@@ -7,6 +7,8 @@ package io.github.jinedl.sitelimit.ct
  */
 class UsageBook {
     private val map = HashMap<String, Int>()
+    private val changed = HashSet<String>()
+    private val removed = HashSet<String>()
 
     /** Были изменения с последнего сохранения. */
     var dirty = false
@@ -18,15 +20,26 @@ class UsageBook {
 
     fun addSeconds(date: String, k: Key, s: Int, free: Boolean = false) {
         if (s <= 0) return
-        val kk = key(date, k, if (free) 'f' else 's')
-        map[kk] = (map[kk] ?: 0) + s
+        bump(key(date, k, if (free) 'f' else 's'), s)
+    }
+
+    fun addOpen(date: String, k: Key) = bump(key(date, k, 'o'), 1)
+
+    private fun bump(kk: String, by: Int) {
+        map[kk] = (map[kk] ?: 0) + by
+        changed.add(kk)
+        removed.remove(kk)
         dirty = true
     }
 
-    fun addOpen(date: String, k: Key) {
-        val kk = key(date, k, 'o')
-        map[kk] = (map[kk] ?: 0) + 1
-        dirty = true
+    /** Изменения с прошлого сохранения: новые значения и удалённые ключи. После вызова — «сохранено». */
+    fun drainChanges(): Pair<Map<String, Int>, Set<String>> {
+        val upd = changed.associateWith { map[it] ?: 0 }
+        val rem = HashSet(removed)
+        changed.clear()
+        removed.clear()
+        dirty = false
+        return upd to rem
     }
 
     /** Секунды в лимит по набору типов во всех сервисах (для общих лимитов). */
@@ -44,7 +57,11 @@ class UsageBook {
     /** Удаляет записи раньше даты border (как у сайтов — хранение 60 дней). Возвращает число удалённых. */
     fun cleanup(border: String): Int {
         val old = map.keys.filter { it.substringBefore('|') < border }
-        old.forEach { map.remove(it) }
+        for (k in old) {
+            map.remove(k)
+            changed.remove(k)
+            removed.add(k)
+        }
         if (old.isNotEmpty()) dirty = true
         return old.size
     }
@@ -52,14 +69,12 @@ class UsageBook {
     fun load(values: Map<String, Int>) {
         map.clear()
         map.putAll(values)
+        changed.clear()
+        removed.clear()
         dirty = false
     }
 
     fun export(): Map<String, Int> = HashMap(map)
-
-    fun markSaved() {
-        dirty = false
-    }
 
     companion object {
         const val KEEP_DAYS = 60L
