@@ -205,6 +205,15 @@
           "any": [{"anyRe": "^(\\d[\\d\\s.,]*\\s+)?коммент", "yMax": 0.15}]
         },
         {
+          "id": "vk_chat",
+          "type": "chat",
+          "status": "guess",
+          "any": [
+            {"editable": true, "yMin": 0.6},
+            {"selected": true, "anyRe": "^(мессенджер|сообщения|messenger|messages)", "yMin": 0.82}
+          ]
+        },
+        {
           "id": "vk_community",
           "type": "channel",
           "status": "guess",
@@ -217,15 +226,6 @@
           "type": "service",
           "status": "guess",
           "all": [{"editable": true, "yMax": 0.15}]
-        },
-        {
-          "id": "vk_chat",
-          "type": "chat",
-          "status": "guess",
-          "any": [
-            {"editable": true, "yMin": 0.6},
-            {"selected": true, "anyRe": "^(мессенджер|сообщения|messenger|messages)", "yMin": 0.82}
-          ]
         },
         {
           "id": "vk_feed",
@@ -278,6 +278,12 @@
           ]
         },
         {
+          "id": "yt_search",
+          "type": "service",
+          "status": "guess",
+          "all": [{"editable": true, "yMax": 0.15}]
+        },
+        {
           "id": "yt_channel",
           "type": "channel",
           "status": "guess",
@@ -286,12 +292,6 @@
             {"anyRe": "подписчик|subscriber", "yMax": 0.5},
             {"anyRe": "^@\\S+", "yMax": 0.5}
           ]
-        },
-        {
-          "id": "yt_search",
-          "type": "service",
-          "status": "guess",
-          "all": [{"editable": true, "yMax": 0.15}]
         },
         {
           "id": "yt_feed",

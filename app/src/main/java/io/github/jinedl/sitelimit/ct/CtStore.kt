@@ -17,6 +17,8 @@ object CtStore {
 
     private fun p(c: Context): SharedPreferences = c.getSharedPreferences("ct", Context.MODE_PRIVATE)
     private fun u(c: Context): SharedPreferences = c.getSharedPreferences("ct_usage", Context.MODE_PRIVATE)
+    /** Снимки — отдельным файлом: частые мелкие записи (строка «Сейчас») не переписывают их. */
+    private fun sn(c: Context): SharedPreferences = c.getSharedPreferences("ct_snaps", Context.MODE_PRIVATE)
 
     private fun changed(c: Context, block: SharedPreferences.Editor.() -> Unit) {
         val prefs = p(c)
@@ -143,15 +145,22 @@ object CtStore {
     fun setMask(c: Context, on: Boolean) = p(c).edit().putBoolean("mask", on).apply()
 
     /** Последние снимки (новые первыми). replaceFirst — заменить последний снимок того же экрана. */
-    fun snapshots(c: Context): List<String> = readList(c, "snaps") { l -> l.mapNotNull { it as? String } }
+    fun snapshots(c: Context): List<String> {
+        val raw = sn(c).getString("snaps", null) ?: return emptyList()
+        return try {
+            MiniJson.parseList(raw).mapNotNull { it as? String }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 
     fun pushSnapshot(c: Context, text: String, replaceFirst: Boolean) {
         val list = snapshots(c).toMutableList()
         if (replaceFirst && list.isNotEmpty()) list[0] = text else list.add(0, text)
-        p(c).edit().putString("snaps", MiniJson.write(list.take(MAX_SNAPS))).apply()
+        sn(c).edit().putString("snaps", MiniJson.write(list.take(MAX_SNAPS))).apply()
     }
 
-    fun clearSnapshots(c: Context) = p(c).edit().remove("snaps").apply()
+    fun clearSnapshots(c: Context) = sn(c).edit().remove("snaps").apply()
 
     // ---- счётчики ----
 

@@ -1,0 +1,6 @@
+# expect: youtube channel
+pkg=com.google.android.youtube w=1080 h=2107
+y=400..460 x=300..1040 TextView text="@mathlectures"
+y=470..520 x=300..1040 TextView text="1,2 млн подписчиков · 345 видео"
+y=2000..2107 x=0..1080 FrameLayout id=pivot_bar
+y=2010..2100 x=0..216 Button desc="Главная" sel click

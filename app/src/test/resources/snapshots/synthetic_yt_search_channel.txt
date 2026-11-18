@@ -1,0 +1,6 @@
+# expect: youtube service
+pkg=com.google.android.youtube w=1080 h=2107
+y=90..180 x=150..900 EditText text="лекции матанализ" edit
+y=300..420 x=40..1040 ViewGroup desc="@mathlectures · 1,2 млн подписчиков"
+y=300..360 x=300..1040 TextView text="@mathlectures"
+y=360..420 x=300..1040 TextView text="1,2 млн подписчиков"
