@@ -74,8 +74,18 @@ object Decider {
 /**
  * Подсчёт и решение за один тик службы — без Android, чтобы проверять тестами.
  * Отвечает за секунды, открытия, полночь и 1,5 с на переход (как у сайтов).
+ *
+ * Открытие — вход в тип после перерыва больше gapMs (0.10-beta2: 5 с, kb/04 «Открыто»).
+ * Вход в закрытый тип (закрыто, минуты исчерпаны, «всегда нельзя») открытием не считается:
+ * его всё равно закроют через 1,5 с.
  */
-class CtCore(val book: UsageBook, gapMs: Long = 10_000, private val graceMs: Long = 1_500) {
+class CtCore(val book: UsageBook, gapMs: Long = OPEN_GAP_MS, private val graceMs: Long = 1_500) {
+
+    companion object {
+        const val OPEN_GAP_MS = 5_000L
+        /** Сколько держать название канала или чата, если на одном разборе его не нашлось (анимация шапки). */
+        const val TITLE_HOLD_MS = 3_000L
+    }
 
     class Config(val rules: ModeRules, val modeTitle: String, val exceptions: List<ExRule>)
 
@@ -85,36 +95,62 @@ class CtCore(val book: UsageBook, gapMs: Long = 10_000, private val graceMs: Lon
     private var pendingMs = 0L
     private var overKey: Key? = null
     private var overSince = 0L
+    private var titled: Detection? = null
+    private var titledAt = 0L
 
     /** Последнее решение (для экрана и отладки). */
     var last: Verdict? = null
+        private set
+
+    /** Последнее распознавание с учётом удержанного названия. */
+    var lastDetection: Detection? = null
         private set
 
     /** Сейчас идут 1,5 с на переход: служба проверяет чаще. */
     val inGrace: Boolean get() = overKey != null
 
     /**
+     * Название пропало на одном разборе (шапка в анимации) — берём прежнее, если тот же сервис и тип
+     * и с последнего найденного прошло не больше TITLE_HOLD_MS. Иначе исключение «всегда можно»
+     * на миг перестаёт действовать.
+     */
+    fun stickTitle(d: Detection, now: Long): Detection {
+        if (d.title != null) {
+            titled = d
+            titledAt = now
+            return d
+        }
+        val t = titled ?: return d
+        if (t.service == d.service && t.type == d.type && now - titledAt <= TITLE_HOLD_MS) return d.copy(title = t.title)
+        return d
+    }
+
+    /**
      * det == null — сервиса на экране нет (другое приложение, экран выключен).
      * Возвращает решение о блокировке, когда 1,5 с на переход прошли, иначе null.
      */
-    fun tick(date: String, det: Detection?, now: Long, elapsedMs: Long, cfg: Config): Verdict? {
-        if (det == null) {
+    fun tick(date: String, detIn: Detection?, now: Long, elapsedMs: Long, cfg: Config): Verdict? {
+        if (detIn == null) {
             tracker.update(date, null, now)
             pendingMs = 0
             overKey = null
             last = null
+            lastDetection = null
             return null
         }
+        val det = stickTitle(detIn, now)
+        lastDetection = det
         val type = Decider.effectiveType(det, cfg.exceptions)
         val key = Key(det.service, type)
-        val free = ExKind.ALLOW in Exceptions.forTitle(cfg.exceptions, det.service, det.title) &&
-            ExKind.DENY !in Exceptions.forTitle(cfg.exceptions, det.service, det.title)
+        val kinds = Exceptions.forTitle(cfg.exceptions, det.service, det.title)
+        val free = ExKind.ALLOW in kinds && ExKind.DENY !in kinds
 
+        var newOpen = false
         if (tracker.update(date, key, now)) {
             val opensLimit = cfg.rules.limit(det.service, type).opens
             sessionKey = key
             sessionBlockedByOpens = !free && opensLimit != null && book.opens(date, key) >= opensLimit
-            if (!free && !sessionBlockedByOpens) book.addOpen(date, key)
+            newOpen = !free && !sessionBlockedByOpens
         }
 
         pendingMs += elapsedMs
@@ -122,8 +158,12 @@ class CtCore(val book: UsageBook, gapMs: Long = 10_000, private val graceMs: Lon
         pendingMs %= 1000
         if (add > 0) book.addSeconds(date, key, add, free)
 
-        val v = Decider.decide(det, type, cfg.rules, cfg.modeTitle, cfg.exceptions, book, date,
+        var v = Decider.decide(det, type, cfg.rules, cfg.modeTitle, cfg.exceptions, book, date,
             sessionBlockedByOpens && sessionKey == key)
+        if (newOpen && !v.blocked) {
+            book.addOpen(date, key)
+            v = v.copy(remainingOpens = v.remainingOpens?.let { (it - 1).coerceAtLeast(0) })
+        }
         last = v
         if (!v.blocked) {
             overKey = null

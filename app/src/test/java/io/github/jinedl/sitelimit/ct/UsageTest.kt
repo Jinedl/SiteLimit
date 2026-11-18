@@ -60,10 +60,59 @@ class UsageTest {
     fun shortInterruptionIsSameOpen() {
         val core = CtCore(UsageBook())
         var t = run(core, d1, det(ContentType.CHANNEL), 0, 5)
-        t = run(core, d1, null, t, 5)                              // шторка или другое приложение 5 с
-        t = run(core, d1, det(ContentType.UNKNOWN), t, 3)          // мелькнул неизвестный экран
+        t = run(core, d1, null, t, 2)                              // шторка или другое приложение 2 с
+        t = run(core, d1, det(ContentType.UNKNOWN), t, 2)          // мелькнул неизвестный экран
         run(core, d1, det(ContentType.CHANNEL), t, 5)
         assertEquals(1, core.book.opens(d1, tgChannel))
+    }
+
+    @Test
+    fun openGapIsFiveSeconds() {
+        assertEquals(5_000L, CtCore.OPEN_GAP_MS)
+        val core = CtCore(UsageBook())
+        var t = run(core, d1, det(ContentType.CHANNEL), 0, 3)
+        t = run(core, d1, null, t, 4)                              // 4 с в другом приложении — то же открытие
+        t = run(core, d1, det(ContentType.CHANNEL), t, 3)
+        assertEquals(1, core.book.opens(d1, tgChannel))
+        t = run(core, d1, null, t, 7)                              // 7 с — новое открытие
+        run(core, d1, det(ContentType.CHANNEL), t, 3)
+        assertEquals(2, core.book.opens(d1, tgChannel))
+    }
+
+    @Test
+    fun enteringClosedTypeIsNotAnOpen() {
+        val closed = CtCore.Config(ModeRules().with("telegram", ContentType.CHANNEL, Limit(minutes = 0)), "Только общение", emptyList())
+        val core = CtCore(UsageBook())
+        var t = 0L
+        repeat(3) {
+            t = run(core, d1, det(ContentType.CHANNEL), t, 2, closed)
+            t = run(core, d1, det(ContentType.CHAT), t, 10, closed)
+        }
+        assertEquals("закрытые попытки — не открытия", 0, core.book.opens(d1, tgChannel))
+        run(core, d1, det(ContentType.CHANNEL), t, 2)                // режим без ограничений
+        assertEquals(1, core.book.opens(d1, tgChannel))
+    }
+
+    @Test
+    fun titleIsHeldWhenHeaderBlinks() {
+        val ex = listOf(ExRule("telegram", "Учебный канал", ExKind.ALLOW))
+        val cfg = CtCore.Config(ModeRules().with("telegram", ContentType.CHANNEL, Limit(minutes = 0)), "Только общение", ex)
+        val core = CtCore(UsageBook())
+        var t = run(core, d1, det(ContentType.CHANNEL, "Учебный канал"), 0, 3, cfg)
+        // шапка в анимации 2 с: название не найдено — исключение продолжает действовать
+        repeat(8) {
+            t += 250
+            assertNull(core.tick(d1, det(ContentType.CHANNEL), t, 250, cfg))
+            assertTrue(core.last!!.free)
+            assertEquals("Учебный канал", core.lastDetection!!.title)
+        }
+        // названия нет дольше 3 с — это уже не тот канал, закрывается
+        var blocked: Verdict? = null
+        repeat(12) {
+            t += 250
+            blocked = core.tick(d1, det(ContentType.CHANNEL), t, 250, cfg) ?: blocked
+        }
+        assertNotNull(blocked)
     }
 
     @Test
