@@ -1,0 +1,62 @@
+# SiteLimit снимок · 02:38:26 · com.google.android.youtube · 1080x2107
+# Было в 0.10-beta3: YouTube — Каналы и паблики · правило yt_channel
+# Правила: v3 от 2026-11-20 (встроенные)
+# expect: youtube service
+# Тексты обрезаны до 40 симв., буквы скрыты (•), кроме слов из правил. ⚑ — слово из правил в обрезанной части.
+pkg=com.google.android.youtube w=1080 h=2107
+y=0..2340 x=0..1080 LinearLayout id=action_bar_root
+y=0..2340 x=0..1080 FrameLayout id=content
+y=0..2340 x=0..1080 ViewGroup id=reel_time_bar
+y=0..2340 x=0..1080 DrawerLayout id=more_drawer_container
+y=0..2340 x=0..1080 FrameLayout id=slim_status_bar_player_container
+y=0..2340 x=0..1080 ViewGroup id=navigation_bar_divider_frame
+y=0..2340 x=0..1080 FrameLayout id=global_slim_status_bar_container
+y=0..2340 x=0..1080 FrameLayout id=accessibility_layer_container
+y=0..2340 x=0..1080 ViewGroup id=next_gen_watch_container_layout
+y=0..2340 x=0..1080 ViewGroup id=watch_while_layout_coordinator_layout
+y=0..2340 x=0..1080 FrameLayout id=fab_container
+y=0..2340 x=0..1080 FrameLayout id=pane_fragment_container
+y=0..89 x=0..1080 View id=global_status_bar_view
+y=89..2340 x=0..1080 ScrollView id=browse_fragment_layout_coordinator_layout
+y=89..233 x=0..1080 LinearLayout id=appbar_layout
+y=89..233 x=0..1080 FrameLayout id=toolbar_container
+y=89..233 x=0..1080 ViewGroup id=toolbar
+y=89..233 x=0..168 ImageButton desc="••••••• •••••" click
+y=89..233 x=168..816 LinearLayout id=search_box
+y=89..233 x=672..816 ImageView id=search_clear desc="••••••••." click
+y=89..233 x=816..960 ImageView id=voice_search desc="••••••••• поиск" click
+y=89..233 x=960..1080 ImageView desc="•••••• •••••••••" click
+y=113..209 x=168..672 TextView id=search_query text="•••••••" click
+y=233..2340 x=0..1080 FrameLayout id=pane_fragment_contents
+y=233..2340 x=0..1080 FrameLayout id=loading_layout
+y=233..2340 x=0..1080 RecyclerView id=results
+y=311..527 x=36..252 Button desc="••••••• •• канал" click
+y=323..413 x=288..583 ViewGroup text="•••••••" desc="•••••••"
+y=413..461 x=288..497 ViewGroup text="@•••••••••" desc="@•••••••••"
+y=467..515 x=288..869 ViewGroup text="000 •••••• подписчиков • 000 видео" desc="000 •••••• подписчиков • 000 видео"
+y=563..683 x=36..528 Button desc="•••••••• •••••••• •• канал "•••••••"" click
+y=563..683 x=552..1044 Button desc="••••••• •• канал" click
+y=596..650 x=621..974 ViewGroup text="••••••• •• канал" desc="••••••• •• канал"
+y=599..648 x=104..461 ViewGroup text="•••••••••••" desc="•••••••••••"
+y=770..836 x=48..389 ViewGroup desc="••••• видео"
+y=770..836 x=48..389 ViewGroup text="••••• видео" desc="••••• видео"
+y=875..1620 x=24..1008 Button desc="••••••••••••• видео "00 ••••• 00 ••••••"…"(197) click ⚑канал
+y=875..1620 x=1008..1080 Button desc="••••••••••••• видео "00 ••••• 00 ••••••"…"(192) click ⚑канал,бот
+y=1338..1398 x=840..966 ViewGroup desc="00 ••••• 00 ••••••"
+y=1347..1389 x=858..948 ViewGroup text="00:00" desc="00:00"
+y=1440..1548 x=48..156 Button desc="••••••• •• канал "•••••••"" click
+y=1440..1560 x=192..885 ViewGroup text="«•••••••» ••••••••. ••••••• •••••••••• •…"(58) desc="«•••••••» ••••••••. ••••••• •••••••••• •…"(58)
+y=1440..1494 x=933..987 Button desc="•••• ••••••••" click
+y=1440..1548 x=1032..1080 Button desc="••••••• •• канал "•••••••"" click
+y=1572..1620 x=192..751 ViewGroup text="••••••• 0,0 •••. 0 ••. •••••" desc="••••••• 0,0 •••. 0 ••. •••••"
+y=2052..2340 x=0..1080 FrameLayout id=bottom_bar_container
+y=2052..2340 x=0..1080 HorizontalScrollView id=pivot_bar
+y=2052..2196 x=0..270 Button desc="Главная" sel click
+y=2052..2196 x=270..540 Button desc="Shorts" click
+y=2052..2196 x=540..810 Button desc="•••••••• видео" click
+y=2052..2196 x=810..1080 Button desc="••" click
+y=2112..2184 x=99..171 ImageView id=image sel
+y=2112..2184 x=369..441 ImageView id=image
+y=2112..2184 x=639..711 ImageView id=image
+y=2112..2184 x=909..981 FrameLayout id=thumbnail_layout
+y=2112..2184 x=909..981 ImageView id=pivot_bar_thumbnail
