@@ -187,7 +187,48 @@ object CtStore {
         if (!force && now - snapSavedAt < SNAP_SAVE_MS) return
         snapSavedAt = now
         snapDirty = false
-        sn(c).edit().putString("snaps", MiniJson.write(snapList(c))).apply()
+        val e = sn(c).edit().putString("snaps", MiniJson.write(snapList(c)))
+        if (journalDirty) {
+            journalDirty = false
+            e.putString("journal", MiniJson.write(journalList(c).toList()))
+        }
+        e.apply()
+    }
+
+    // ---- журнал открытий (отладка): последние JOURNAL_MAX записей, новые первыми ----
+
+    private const val JOURNAL_MAX = 60
+    private var journal: ArrayDeque<String>? = null
+    private var journalDirty = false
+
+    private fun journalList(c: Context): ArrayDeque<String> {
+        journal?.let { return it }
+        val raw = sn(c).getString("journal", null)
+        val list = try {
+            raw?.let { MiniJson.parseList(it).mapNotNull { s -> s as? String } } ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
+        return ArrayDeque(list).also { journal = it }
+    }
+
+    @Synchronized
+    fun addJournal(c: Context, line: String) {
+        val j = journalList(c)
+        j.addFirst(line)
+        while (j.size > JOURNAL_MAX) j.removeLast()
+        journalDirty = true
+        snapDirty = true // записывается вместе со снимками (не чаще раза в 10 с)
+    }
+
+    @Synchronized
+    fun journal(c: Context): List<String> = journalList(c).toList()
+
+    @Synchronized
+    fun clearJournal(c: Context) {
+        journal = ArrayDeque()
+        journalDirty = false
+        sn(c).edit().remove("journal").apply()
     }
 
     @Synchronized

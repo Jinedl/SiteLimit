@@ -99,10 +99,11 @@ class UsageTest {
         val cfg = CtCore.Config(ModeRules().with("telegram", ContentType.CHANNEL, Limit(minutes = 0)), "Только общение", ex)
         val core = CtCore(UsageBook())
         var t = run(core, d1, det(ContentType.CHANNEL, "Учебный канал"), 0, 3, cfg)
+        val noTitle = Detection("telegram", ContentType.CHANNEL, null, "tg_channel", hasTitleRule = true)
         // шапка в анимации 2 с: название не найдено — исключение продолжает действовать
         repeat(8) {
             t += 250
-            assertNull(core.tick(d1, det(ContentType.CHANNEL), t, 250, cfg))
+            assertNull(core.tick(d1, noTitle, t, 250, cfg))
             assertTrue(core.last!!.free)
             assertEquals("Учебный канал", core.lastDetection!!.title)
         }
@@ -110,9 +111,47 @@ class UsageTest {
         var blocked: Verdict? = null
         repeat(12) {
             t += 250
-            blocked = core.tick(d1, det(ContentType.CHANNEL), t, 250, cfg) ?: blocked
+            blocked = core.tick(d1, noTitle, t, 250, cfg) ?: blocked
         }
         assertNotNull(blocked)
+    }
+
+    @Test
+    fun commentsInheritChannelException() {
+        val ex = listOf(ExRule("telegram", "Учебный канал", ExKind.ALLOW))
+        val cfg = CtCore.Config(ModeRules().with("telegram", ContentType.CHANNEL, Limit(minutes = 0)), "Только общение", ex)
+        val core = CtCore(UsageBook())
+        val comments = Detection("telegram", ContentType.CHANNEL, null, "tg_comments", hasTitleRule = false)
+        var t = run(core, d1, det(ContentType.CHANNEL, "Учебный канал"), 0, 3, cfg)
+        // комментарии этого канала — 2 минуты, исключение действует всё время
+        repeat(120) {
+            t += 1000
+            assertNull(core.tick(d1, comments, t, 1000, cfg))
+            assertTrue(core.last!!.free)
+        }
+        // ушёл в список чатов, потом сразу в комментарии (например, по уведомлению) — уже не тот канал
+        t = run(core, d1, det(ContentType.CHAT), t, 3, cfg)
+        var blocked: Verdict? = null
+        repeat(3) {
+            t += 1000
+            blocked = core.tick(d1, comments, t, 1000, cfg) ?: blocked
+        }
+        assertNotNull(blocked)
+    }
+
+    @Test
+    fun journalExplainsOpens() {
+        val cfg = CtCore.Config(ModeRules().with("telegram", ContentType.CHANNEL, Limit(opens = 1)), "Обычный", emptyList())
+        val core = CtCore(UsageBook())
+        val log = ArrayList<String>()
+        core.onEvent = { log.add(it) }
+        var t = run(core, d1, det(ContentType.CHANNEL, "А"), 0, 2, cfg)
+        t = run(core, d1, det(ContentType.CHAT), t, 2, cfg)
+        t = run(core, d1, det(ContentType.CHANNEL, "А"), t, 2, cfg)
+        run(core, d1, null, t, 1, cfg)
+        assertTrue(log.toString(), log[0].contains("+1 открытие, сегодня 1 из 1"))
+        assertTrue(log.toString(), log[2].contains("не засчитано"))
+        assertTrue(log.toString(), log[3].startsWith("вне сервиса"))
     }
 
     @Test

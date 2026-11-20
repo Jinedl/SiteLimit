@@ -1,0 +1,78 @@
+# SiteLimit снимок · 19:36:21 · com.vkontakte.android · 1080x2107
+# Было в 0.10-beta2: VK — Лента и рекомендации · правило vk_main_fallback · ⛔ закрыто в режиме «Только общение»
+# Правила: v2 от 2026-11-18 (встроенные)
+# expect: vk service
+# Тексты обрезаны до 40 симв., буквы скрыты (•), кроме слов из правил. ⚑ — слово из правил в обрезанной части.
+pkg=com.vkontakte.android w=1080 h=2107
+y=0..2340 x=0..1080 FrameLayout id=action_bar_root
+y=0..2340 x=0..1080 FrameLayout id=content
+y=0..2340 x=0..1080 FrameLayout id=bottom_nav_content
+y=0..2340 x=0..1080 FrameLayout id=fragment_without_bottom_bar_wrapper
+y=0..2196 x=0..1080 FrameLayout id=fragment_wrapper
+y=89..2052 x=0..1080 ScrollView id=appkit_loader_root
+y=89..257 x=0..1080 LinearLayout id=app_bar_layout
+y=89..257 x=0..1080 FrameLayout id=topBarWrapper
+y=134..213 x=180..522 TextView text="Настройки"
+y=257..2052 x=0..1080 FrameLayout id=appkit_loader_content
+y=257..2052 x=0..1080 ViewGroup id=refresh_layout
+y=257..2052 x=0..1080 FrameLayout id=content_wrap
+y=257..2052 x=0..1080 GridView id=list
+y=257..799 x=24..1056 FrameLayout id=profile_view_container
+y=257..258 x=0..1080 ImageView id=shadow
+y=305..775 x=24..1056 ViewGroup id=profile_user_data_container desc="••••• ••••••••••••• • •••••••••• •••••••…"(79) ⚑рекомендации
+y=305..503 x=438..642 FrameLayout id=user_avatar desc="••••• ••••••••••••• • •••••••••• •••••••…"(79) click ⚑рекомендации
+y=317..485 x=456..624 ImageView id=ecosystem_profile_avatar_view
+y=434..494 x=570..630 ImageView id=notification_icon
+y=503..567 x=24..1056 TextView id=user_name text="••••• ••••••"
+y=573..619 x=24..1056 TextView id=user_info text="+0 ··· ··· ·· 00"
+y=667..775 x=48..1032 FrameLayout id=vk_id_lk_button
+y=667..775 x=48..1032 Button desc="•••••••••• ••••••••• •• ••"
+y=690..755 x=232..848 FrameLayout id=ds_internal_title_container
+y=691..751 x=232..848 TextView id=ds_internal_button_title text="•••••••••• •••••••••  "
+y=835..979 x=0..1080 FrameLayout id=preference_item_cell
+y=835..979 x=0..1080 LinearLayout id=ds_internal_sexy_cell
+y=847..967 x=168..1032 LinearLayout id=ds_internal_cell_middle
+y=865..949 x=48..168 LinearLayout id=ds_internal_cell_left
+y=865..949 x=48..132 FrameLayout id=ds_internal_cell_left_main_wrapper
+y=865..949 x=48..132 ImageView id=ds_internal_cell_left_main_icon
+y=877..937 x=168..481 LinearLayout id=ds_internal_cell_middle_title_wrapper
+y=877..937 x=168..481 TextView id=ds_internal_cell_middle_title text="•••••••••••"
+y=979..1123 x=0..1080 FrameLayout id=preference_item_cell
+y=979..1123 x=0..1080 LinearLayout id=ds_internal_sexy_cell
+y=991..1111 x=168..1032 LinearLayout id=ds_internal_cell_middle
+y=1009..1093 x=48..168 LinearLayout id=ds_internal_cell_left
+y=1009..1093 x=48..132 FrameLayout id=ds_internal_cell_left_main_wrapper
+y=1009..1093 x=48..132 ImageView id=ds_internal_cell_left_main_icon
+y=1021..1081 x=168..506 LinearLayout id=ds_internal_cell_middle_title_wrapper
+y=1021..1081 x=168..506 TextView id=ds_internal_cell_middle_title text="•• ••••••••••"
+y=1198..1342 x=0..1080 FrameLayout id=preference_item_cell
+y=1198..1342 x=0..1080 LinearLayout id=ds_internal_sexy_cell
+y=1210..1330 x=168..1032 LinearLayout id=ds_internal_cell_middle
+y=1228..1312 x=48..168 LinearLayout id=ds_internal_cell_left
+y=1228..1312 x=48..132 FrameLayout id=ds_internal_cell_left_main_wrapper
+y=1228..1312 x=48..132 ImageView id=ds_internal_cell_left_main_icon
+y=1240..1300 x=168..354 LinearLayout id=ds_internal_cell_middle_title_wrapper
+y=1240..1300 x=168..354 TextView id=ds_internal_cell_middle_title text="•••••••"
+y=2050..2196 x=0..1080 FrameLayout id=bottom_navigation_container
+y=2050..2196 x=0..1080 LinearLayout id=bottom_navigation_sliding_container
+y=2050..2052 x=0..1080 View id=bottom_navigation_shadow
+y=2052..2196 x=0..1080 FrameLayout id=bottom_navigation
+y=2052..2196 x=0..216 FrameLayout id=tab_news desc="Главная" click
+y=2052..2196 x=216..432 FrameLayout id=tab_overview desc="Поиск" click
+y=2052..2196 x=432..648 FrameLayout id=tab_messages desc="Мессенджер 00 ••••••••••••• •••••" click
+y=2052..2196 x=648..864 FrameLayout id=tab_clips desc="Клипы" click
+y=2052..2196 x=864..1080 FrameLayout id=tab_discover desc="Сервисы" click
+y=2077..2131 x=120..174 FrameLayout id=indicator_container
+y=2077..2095 x=138..156 View id=dot
+y=2077..2131 x=551..616 FrameLayout id=indicator_container
+y=2077..2131 x=551..616 TextView id=counter text="00"
+y=2082..2166 x=66..150 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=66..150 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=282..366 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=282..366 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=498..582 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=498..582 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=714..798 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=714..798 ImageView id=navigation_bar_item_icon_view
+y=2082..2166 x=930..1014 FrameLayout id=navigation_bar_item_icon_container
+y=2082..2166 x=930..1014 ImageView id=navigation_bar_item_icon_view

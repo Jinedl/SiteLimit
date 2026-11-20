@@ -1,0 +1,56 @@
+# SiteLimit снимок · 19:42:39 · com.google.android.youtube · 1080x2107
+# Было в 0.10-beta2: YouTube — Длинное видео · правило yt_video · ⛔ закрыто в режиме «Только общение»
+# Правила: v2 от 2026-11-18 (встроенные)
+# expect: youtube video
+# Тексты обрезаны до 40 симв., буквы скрыты (•), кроме слов из правил. ⚑ — слово из правил в обрезанной части.
+pkg=com.google.android.youtube w=1080 h=2107
+y=0..2340 x=0..1080 LinearLayout id=action_bar_root
+y=0..2340 x=0..1080 FrameLayout id=content
+y=0..2340 x=0..1080 DrawerLayout id=more_drawer_container
+y=0..2340 x=0..1080 FrameLayout id=slim_status_bar_player_container
+y=0..2340 x=0..1080 ViewGroup id=navigation_bar_divider_frame
+y=0..2340 x=0..1080 FrameLayout id=global_slim_status_bar_container
+y=0..2340 x=0..1080 FrameLayout id=accessibility_layer_container
+y=0..2340 x=0..1080 ViewGroup id=next_gen_watch_container_layout
+y=0..2340 x=0..1080 ViewGroup id=next_gen_watch_layout_no_player_fragment_container
+y=89..729 x=0..1080 FrameLayout id=watch_player desc="Видеопроигрыватель" hint="••••••• ••••••, ••••• •••••••• •••••••• …"(50)
+y=89..729 x=0..1080 ViewGroup id=player_overlays click
+y=89..729 x=0..1080 FrameLayout id=player_overlays_custom_views_container
+y=89..729 x=0..1080 FrameLayout id=size_adjustable_outer_wrapper
+y=89..729 x=0..1080 RelativeLayout id=size_adjustable_inner_wrapper
+y=89..729 x=0..1080 FrameLayout id=youtube_controls_overlay
+y=89..729 x=0..1080 FrameLayout id=inset_controls_overlay_wrapper
+y=89..729 x=0..1080 FrameLayout id=inset_overlay_view_layout
+y=89..1134 x=0..1080 ViewGroup id=watch_while_time_bar_view_overlay
+y=89..995 x=0..1080 RelativeLayout id=controls_layout
+y=89..729 x=0..1080 FrameLayout id=player_fragment_container
+y=89..1272 x=0..1080 ViewGroup id=player_view
+y=89..755 x=0..1080 ViewGroup id=watch_while_time_bar_view
+y=89..2340 x=0..1080 ViewGroup id=engagement_panel_wrapper
+y=89..2340 x=0..1080 View id=scrim_view
+y=374..590 x=432..648 ProgressBar id=player_loading_view_thin
+y=422..662 x=0..1080 RelativeLayout id=controls_button_group_layout
+y=591..723 x=18..191 LinearLayout id=ad_details_container_layout
+y=603..711 x=30..179 TextView id=ad_progress_text text="•••••••" desc="••••••• ••••• •••••••••• ••••••••" click
+y=647..755 x=0..1080 SeekBar desc="0 ••••• 0 •••••• •• 0 ••••• 00 •••••••"
+y=697..2340 x=0..1080 FrameLayout id=video_metadata_layout
+y=1469..2340 x=0..1080 ViewGroup id=watch_panel
+y=1469..2340 x=0..1080 FrameLayout id=video_info_loading_layout
+y=1469..2340 x=0..1080 FrameLayout id=sticky_header_container
+y=1469..2340 x=0..1080 RecyclerView id=watch_list
+y=1469..1658 x=0..1080 FrameLayout id=container
+y=1469..1658 x=0..1080 LinearLayout id=channel_navigation_container
+y=1517..2340 x=0..1080 View id=watch_panel_scrim
+y=1517..1580 x=36..1050 TextView id=title text="•••••••••: ••••••••• •••••••••• •••••• •…"(97)
+y=1604..1646 x=36..1014 ViewGroup id=badge_and_subtitle_container
+y=1604..1646 x=36..159 TextView id=collapsed_subtitle text="00 •••."
+y=1658..1802 x=36..1080 LinearLayout id=simple_watch_action_bar
+y=1685..1775 x=36..126 LinearLayout id=avatar
+y=1685..1775 x=150..390 LinearLayout id=action_button1
+y=1685..1775 x=414..714 LinearLayout id=action_button2
+y=1685..1775 x=738..873 LinearLayout id=action_button3
+y=1685..1775 x=897..1080 LinearLayout id=action_button4
+y=1802..2084 x=0..1080 RelativeLayout id=ghost_card_layout
+y=1826..2060 x=36..1044 LinearLayout id=action_button2
+y=2084..2340 x=0..1080 RelativeLayout id=ghost_card_layout
+y=2108..2340 x=0..1080 RelativeLayout id=thumbnail_layout

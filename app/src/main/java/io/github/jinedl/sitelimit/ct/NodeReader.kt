@@ -13,8 +13,8 @@ import android.view.accessibility.AccessibilityNodeInfo
  *  - не больше LIMIT элементов в результате и VISIT_LIMIT просмотренных.
  */
 object NodeReader {
-    const val LIMIT = 300
-    const val VISIT_LIMIT = 900
+    const val LIMIT = 250
+    const val VISIT_LIMIT = 600
     const val LIST_ITEMS = 4
 
     fun read(root: AccessibilityNodeInfo, limit: Int = LIMIT): List<UiNode> {

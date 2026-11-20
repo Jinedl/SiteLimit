@@ -31,10 +31,14 @@ class UiNode(
 /** Снимок окна: пакет, размеры экрана и элементы (в порядке обхода дерева). */
 class Screen(val pkg: String, val width: Int, val height: Int, val nodes: List<UiNode>)
 
-/** Результат распознавания: сервис, тип, название канала или чата (если нашлось) и сработавшее правило. */
+/**
+ * Результат распознавания: сервис, тип, название канала или чата (если нашлось) и сработавшее правило.
+ * hasTitleRule — у правила есть, откуда брать название (у комментариев нет: название наследуется от канала).
+ */
 data class Detection(
     val service: String,
     val type: ContentType,
     val title: String? = null,
     val rule: String? = null,
+    val hasTitleRule: Boolean = false,
 )

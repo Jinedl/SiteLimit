@@ -1,0 +1,5 @@
+# expect: telegram channel
+# комментарии канала: названия в шапке нет (оно берётся от канала в службе — см. UsageTest)
+pkg=org.telegram.messenger.web w=1080 h=2107
+y=97..195 x=181..887 TextView text="12 комментариев"
+y=1900..2050 x=0..1080 EditText hint="Комментарий" edit

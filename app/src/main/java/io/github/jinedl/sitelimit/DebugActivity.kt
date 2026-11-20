@@ -79,6 +79,11 @@ class DebugActivity : Activity() {
             isAllCaps = false
             setOnClickListener { showSnapshots() }
         }
+        val btnJournal = Button(this).apply {
+            isAllCaps = false
+            text = "Журнал открытий"
+            setOnClickListener { showJournal() }
+        }
         val btnRules = Button(this).apply {
             isAllCaps = false
             text = "Файл правил: показать и скопировать"
@@ -104,6 +109,7 @@ class DebugActivity : Activity() {
                 addView(ctText)
                 addView(checkMask)
                 addView(snapsButton)
+                addView(btnJournal)
                 addView(btnRules)
                 addView(btnCustom)
                 addView(Ui.note(this@DebugActivity, "Как снять снимок: включите галочку снимков, откройте нужный экран в сервисе, " +
@@ -201,6 +207,18 @@ class DebugActivity : Activity() {
             }
             .setNegativeButton("Закрыть", null)
             .show()
+    }
+
+    private fun showJournal() {
+        val lines = CtStore.journal(this)
+        if (lines.isEmpty()) {
+            toast(if (CtStore.isEnabled(this)) "Журнал пуст: откройте сервис" else "Сначала включите бету на главном экране")
+            return
+        }
+        textDialog("Журнал (новые сверху)", lines.joinToString("\n"), extra = "Очистить" to {
+            CtStore.clearJournal(this)
+            toast("Журнал очищен")
+        })
     }
 
     private fun showRules() {

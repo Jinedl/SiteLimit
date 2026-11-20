@@ -83,6 +83,7 @@ class ContentEngine(private val svc: AccessibilityService) {
 
     init {
         CtLive.book = core.book
+        core.onEvent = { CtStore.addJournal(svc, "${time()} · $it") }
     }
 
     /** Пакеты всех сервисов (для фильтра событий службы). */

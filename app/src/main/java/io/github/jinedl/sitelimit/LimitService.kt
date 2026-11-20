@@ -51,6 +51,22 @@ class LimitService : AccessibilityService() {
     }
 
     private val handler = Handler(Looper.getMainLooper())
+
+    /**
+     * Сколько экранов SiteLimit сейчас на переднем плане. Пока открыт сам SiteLimit, служба не читает
+     * его окно: запрос окна своего же приложения выполняется в том же главном потоке, что и экран,
+     * и раз в секунду подтормаживал прокрутку, нажатия и ввод (0.10-beta3).
+     */
+    private var ownResumed = 0
+    private val ownUi = object : android.app.Application.ActivityLifecycleCallbacks {
+        override fun onActivityResumed(a: android.app.Activity) { ownResumed++ }
+        override fun onActivityPaused(a: android.app.Activity) { ownResumed = (ownResumed - 1).coerceAtLeast(0) }
+        override fun onActivityCreated(a: android.app.Activity, b: android.os.Bundle?) {}
+        override fun onActivityStarted(a: android.app.Activity) {}
+        override fun onActivityStopped(a: android.app.Activity) {}
+        override fun onActivitySaveInstanceState(a: android.app.Activity, b: android.os.Bundle) {}
+        override fun onActivityDestroyed(a: android.app.Activity) {}
+    }
     private var currentHost: String? = null
     private var lastTick = 0L
     private var pendingMs = 0L
@@ -82,6 +98,8 @@ class LimitService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        application.unregisterActivityLifecycleCallbacks(ownUi)
+        application.registerActivityLifecycleCallbacks(ownUi)
         Store.cleanupOldUsage(this)
         ct = try {
             ContentEngine(this)
@@ -111,6 +129,7 @@ class LimitService : AccessibilityService() {
 
     override fun onDestroy() {
         handler.removeCallbacks(tick)
+        application.unregisterActivityLifecycleCallbacks(ownUi)
         ct?.destroy()
         super.onDestroy()
     }
@@ -148,8 +167,9 @@ class LimitService : AccessibilityService() {
 
         val pm = getSystemService(PowerManager::class.java)
         val screenOn = pm == null || pm.isInteractive
-        val root = if (screenOn) rootInActiveWindow else null
-        val pkg = root?.packageName?.toString()
+        val own = ownResumed > 0
+        val root = if (screenOn && !own) rootInActiveWindow else null
+        val pkg = if (screenOn && own) packageName else root?.packageName?.toString()
 
         // Диагностика для экрана приложения: служба жива и что она видит.
         if (now - lastDiag >= DIAG_EVERY_MS) {

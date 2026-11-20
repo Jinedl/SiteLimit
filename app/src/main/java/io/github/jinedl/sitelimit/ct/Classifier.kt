@@ -6,7 +6,7 @@ object Classifier {
     fun classify(svc: ServiceDef, screen: Screen): Detection {
         for (rule in svc.screens) {
             if (matches(rule, screen)) {
-                return Detection(svc.id, rule.type, title(rule, screen), rule.id)
+                return Detection(svc.id, rule.type, title(rule, screen), rule.id, rule.titles.isNotEmpty())
             }
         }
         return Detection(svc.id, svc.defaultType, null, null)

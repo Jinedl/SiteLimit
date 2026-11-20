@@ -1,5 +1,5 @@
-# expect: vk unknown
-# раздел с заголовком (например «Музыка» из «Сервисов») — не Главная, не закрывается
+# expect: vk service
+# раздел с заголовком «Музыка» (из «Сервисов») — служебное, не Главная
 pkg=com.vkontakte.android w=1080 h=2107
 y=131..210 x=168..924 TextView id=title text="Музыка"
 y=400..1800 x=0..1080 GridView id=recycler

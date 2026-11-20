@@ -110,9 +110,11 @@ class CtCore(val book: UsageBook, gapMs: Long = OPEN_GAP_MS, private val graceMs
     val inGrace: Boolean get() = overKey != null
 
     /**
-     * Название пропало на одном разборе (шапка в анимации) — берём прежнее, если тот же сервис и тип
-     * и с последнего найденного прошло не больше TITLE_HOLD_MS. Иначе исключение «всегда можно»
-     * на миг перестаёт действовать.
+     * Название канала, когда на экране его нет:
+     *  - экран, у правила которого названия нет вовсе (комментарии под постом), сразу после канала
+     *    с названием — это тот же канал: название держится, пока не откроется экран другого типа;
+     *  - название пропало на одном разборе (шапка в анимации) — прежнее держится TITLE_HOLD_MS.
+     * Иначе исключение «всегда можно» не действует в комментариях и мигает при анимации.
      */
     fun stickTitle(d: Detection, now: Long): Detection {
         if (d.title != null) {
@@ -121,9 +123,22 @@ class CtCore(val book: UsageBook, gapMs: Long = OPEN_GAP_MS, private val graceMs
             return d
         }
         val t = titled ?: return d
-        if (t.service == d.service && t.type == d.type && now - titledAt <= TITLE_HOLD_MS) return d.copy(title = t.title)
+        if (t.service != d.service) return d
+        if (t.type != d.type) {
+            if (d.type != ContentType.UNKNOWN) titled = null // ушли в чаты и т.п. — связь с каналом потеряна
+            return d
+        }
+        if (!d.hasTitleRule) {
+            titledAt = now
+            return d.copy(title = t.title)
+        }
+        if (now - titledAt <= TITLE_HOLD_MS) return d.copy(title = t.title)
         return d
     }
+
+    /** Журнал для отладки: переходы между экранами и засчитано ли открытие. */
+    var onEvent: ((String) -> Unit)? = null
+    private var logKey: Key? = null
 
     /**
      * det == null — сервиса на экране нет (другое приложение, экран выключен).
@@ -131,6 +146,8 @@ class CtCore(val book: UsageBook, gapMs: Long = OPEN_GAP_MS, private val graceMs
      */
     fun tick(date: String, detIn: Detection?, now: Long, elapsedMs: Long, cfg: Config): Verdict? {
         if (detIn == null) {
+            if (logKey != null) onEvent?.invoke("вне сервиса (другое приложение, SiteLimit или экран выключен)")
+            logKey = null
             tracker.update(date, null, now)
             pendingMs = 0
             overKey = null
@@ -146,7 +163,8 @@ class CtCore(val book: UsageBook, gapMs: Long = OPEN_GAP_MS, private val graceMs
         val free = ExKind.ALLOW in kinds && ExKind.DENY !in kinds
 
         var newOpen = false
-        if (tracker.update(date, key, now)) {
+        val trackerNew = tracker.update(date, key, now)
+        if (trackerNew) {
             val opensLimit = cfg.rules.limit(det.service, type).opens
             sessionKey = key
             sessionBlockedByOpens = !free && opensLimit != null && book.opens(date, key) >= opensLimit
@@ -165,6 +183,10 @@ class CtCore(val book: UsageBook, gapMs: Long = OPEN_GAP_MS, private val graceMs
             v = v.copy(remainingOpens = v.remainingOpens?.let { (it - 1).coerceAtLeast(0) })
         }
         last = v
+        if (onEvent != null && (key != logKey || trackerNew)) {
+            onEvent?.invoke(describeEntry(det, type, v, free, trackerNew, newOpen, date, key, cfg))
+        }
+        logKey = key
         if (!v.blocked) {
             overKey = null
             return null
@@ -178,5 +200,23 @@ class CtCore(val book: UsageBook, gapMs: Long = OPEN_GAP_MS, private val graceMs
             return v
         }
         return null
+    }
+
+    private fun describeEntry(
+        det: Detection, type: ContentType, v: Verdict, free: Boolean, trackerNew: Boolean, newOpen: Boolean,
+        date: String, key: Key, cfg: Config,
+    ): String {
+        val head = "${det.service} — ${type.short}" + (det.title?.let { " «$it»" } ?: "") + " (${det.rule ?: "нет правила"})"
+        val limit = cfg.rules.limit(det.service, type).opens
+        val tail = when {
+            type == ContentType.UNKNOWN -> "открытие не прерывает"
+            free -> "исключение «всегда можно», открытия не считаются"
+            !trackerNew -> "то же открытие (вернулся быстрее ${OPEN_GAP_MS / 1000} с)"
+            newOpen && !v.blocked -> "+1 открытие, сегодня ${book.opens(date, key)}" + (limit?.let { " из $it" } ?: "")
+            v.kind == BlockKind.OPENS -> "открытие не засчитано: ${v.reason}"
+            v.blocked -> "открытие не засчитано (закрыт): ${v.reason}"
+            else -> "новое открытие"
+        }
+        return "$head: $tail"
     }
 }
